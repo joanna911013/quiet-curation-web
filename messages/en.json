@@ -3,5 +3,8 @@
     "today": "Today",
     "title": "Quiet Curation",
     "subtitle": "Three calm readings for a slower morning."
+  },
+  "cta": {
+    "continue": "Continue"
   }
 }
