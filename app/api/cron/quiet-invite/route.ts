@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { renderQuietInviteEmail } from "@/lib/emails/renderQuietInviteEmail";
+import { sendInviteEmail } from "@/lib/emails/sendInviteEmail";
 
 export const runtime = "nodejs";
 
@@ -55,9 +57,11 @@ export async function GET(request: Request) {
     );
   }
 
+  const inviteContent = await fetchInviteContent(supabase, curationId);
+
   const { data: recipients, error: recipientsError } = await supabase
     .from("profiles")
-    .select("id, notification_opt_in")
+    .select("id, email, notification_opt_in")
     .eq("notification_opt_in", true);
 
   if (recipientsError) {
@@ -76,6 +80,10 @@ export async function GET(request: Request) {
     failed: 0,
     retried: 0,
   };
+
+  const recipientById = new Map(
+    (recipients ?? []).map((recipient) => [recipient.id, recipient]),
+  );
 
   for (const recipient of recipients ?? []) {
     const { data, error } = await supabase
@@ -106,11 +114,26 @@ export async function GET(request: Request) {
     }
 
     summary.inserted += 1;
-    const sendResult = await sendInvite(
-      normalizedSiteUrl,
-      data.user_id,
-      data.curation_id,
-    );
+    const recipientEmail = recipient.email?.trim();
+
+    if (!recipientEmail) {
+      summary.failed += 1;
+      await markInviteFailed(supabase, {
+        inviteId: data.id,
+        userId: data.user_id,
+        deliveryDate,
+        errorMessage: "missing_email",
+        retryCount: data.retry_count,
+      });
+      continue;
+    }
+
+    await markInviteAttempt(supabase, data.id);
+    const sendResult = await sendInviteEmail({
+      recipient: { id: data.user_id, email: recipientEmail },
+      ...inviteContent,
+      siteUrl: normalizedSiteUrl,
+    });
 
     if (sendResult.ok) {
       summary.sent += 1;
@@ -131,7 +154,7 @@ export async function GET(request: Request) {
     .from("invite_deliveries")
     .select("id, user_id, retry_count, curation_id")
     .eq("delivery_date", deliveryDate)
-    .eq("status", "failed")
+    .in("status", ["failed", "pending"])
     .lt("retry_count", MAX_RETRIES);
 
   if (failedError) {
@@ -143,11 +166,27 @@ export async function GET(request: Request) {
 
   for (const row of failedRows ?? []) {
     summary.retried += 1;
-    const retryResult = await sendInvite(
-      normalizedSiteUrl,
-      row.user_id,
-      row.curation_id,
-    );
+    const retryRecipient = recipientById.get(row.user_id);
+    const retryEmail = retryRecipient?.email?.trim();
+
+    if (!retryEmail) {
+      summary.failed += 1;
+      await markInviteFailed(supabase, {
+        inviteId: row.id,
+        userId: row.user_id,
+        deliveryDate,
+        errorMessage: "missing_email",
+        retryCount: row.retry_count,
+      });
+      continue;
+    }
+
+    await markInviteAttempt(supabase, row.id);
+    const retryResult = await sendInviteEmail({
+      recipient: { id: row.user_id, email: retryEmail },
+      ...inviteContent,
+      siteUrl: normalizedSiteUrl,
+    });
 
     if (retryResult.ok) {
       summary.sent += 1;
@@ -198,19 +237,100 @@ function getSeoulDateString() {
   return formatter.format(new Date());
 }
 
-async function sendInvite(
-  siteUrl: string,
-  userId: string,
+type QuietInviteContent = Omit<
+  Parameters<typeof renderQuietInviteEmail>[0],
+  "siteUrl"
+>;
+
+async function fetchInviteContent(
+  client: SupabaseClient,
   curationId: string,
-) {
-  try {
-    const link = `${siteUrl}/login?redirect=${encodeURIComponent(
-      `/c/${curationId}`,
-    )}`;
-    console.log(`[quiet-invite] ${userId}: ${link}`);
-    return { ok: true };
-  } catch (error) {
-    return { ok: false, error: error instanceof Error ? error.message : null };
+): Promise<QuietInviteContent> {
+  const fallback: QuietInviteContent = {
+    curation: { id: curationId },
+  };
+
+  const { data: pairingRow, error: pairingError } = await client
+    .from("pairings")
+    .select(
+      "id, pairing_date, rationale_short, literature_text, literature_author, literature_title, literature_work, literature_source, verse_id",
+    )
+    .eq("id", curationId)
+    .maybeSingle();
+
+  if (pairingError) {
+    console.error("[quiet-invite] Failed to load pairing:", pairingError);
+    return fallback;
+  }
+
+  if (!pairingRow) {
+    return fallback;
+  }
+
+  const curation = {
+    id: pairingRow.id,
+    pairing_date: pairingRow.pairing_date,
+    rationale_short: pairingRow.rationale_short,
+    literature_text: pairingRow.literature_text,
+    literature_title: pairingRow.literature_title,
+    literature_work: pairingRow.literature_work,
+  };
+
+  const pairing: NonNullable<QuietInviteContent["pairing"]> = {
+    literature_text: pairingRow.literature_text,
+    literature_author: pairingRow.literature_author,
+    literature_title: pairingRow.literature_title,
+    literature_work: pairingRow.literature_work,
+    literature_source: pairingRow.literature_source,
+  };
+
+  if (pairingRow.verse_id) {
+    const { data: verseRow, error: verseError } = await client
+      .from("verses")
+      .select("book, chapter, verse, translation, canonical_ref, verse_text")
+      .eq("id", pairingRow.verse_id)
+      .maybeSingle();
+
+    if (verseError) {
+      console.error("[quiet-invite] Failed to load verse:", verseError);
+    } else if (verseRow) {
+      pairing.canonical_ref =
+        verseRow.canonical_ref ?? formatVerseReference(verseRow);
+      pairing.verse_text = verseRow.verse_text;
+      pairing.translation = verseRow.translation;
+    }
+  }
+
+  return { curation, pairing };
+}
+
+function formatVerseReference(verse: {
+  canonical_ref?: string | null;
+  book?: string | null;
+  chapter?: number | null;
+  verse?: number | null;
+}) {
+  if (verse.canonical_ref) {
+    return verse.canonical_ref;
+  }
+  if (verse.book && verse.chapter && verse.verse) {
+    return `${verse.book} ${verse.chapter}:${verse.verse}`;
+  }
+  return null;
+}
+
+async function markInviteAttempt(client: SupabaseClient, inviteId: string) {
+  const nowIso = new Date().toISOString();
+  const { error } = await client
+    .from("invite_deliveries")
+    .update({ last_attempt_at: nowIso })
+    .eq("id", inviteId);
+
+  if (error) {
+    console.error("[quiet-invite] markInviteAttempt failed:", {
+      inviteId,
+      error,
+    });
   }
 }
 
