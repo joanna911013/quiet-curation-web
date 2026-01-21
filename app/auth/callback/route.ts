@@ -8,10 +8,12 @@ export async function GET(request: Request) {
   const tokenHash =
     url.searchParams.get("token_hash") ?? url.searchParams.get("token");
   const otpType = url.searchParams.get("type");
+  const redirectParam = url.searchParams.get("redirect");
   const errorParam = url.searchParams.get("error");
   const errorCode = url.searchParams.get("error_code");
   const errorDescription = url.searchParams.get("error_description");
   const origin = url.origin;
+  const safeRedirect = sanitizeRedirect(redirectParam);
 
   if (errorParam || errorCode || errorDescription) {
     const params = new URLSearchParams();
@@ -24,14 +26,18 @@ export async function GET(request: Request) {
     if (!errorCode && !errorDescription && errorParam) {
       params.set("error", errorParam);
     }
+    appendRedirectParam(params, safeRedirect);
     return NextResponse.redirect(`${origin}/login?${params.toString()}`);
   }
 
   if (!code && !(tokenHash && otpType)) {
-    return NextResponse.redirect(`${origin}/login?error=missing_code`);
+    const params = new URLSearchParams();
+    params.set("error", "missing_code");
+    appendRedirectParam(params, safeRedirect);
+    return NextResponse.redirect(`${origin}/login?${params.toString()}`);
   }
 
-  const response = NextResponse.redirect(`${origin}/`);
+  const response = NextResponse.redirect(`${origin}${safeRedirect}`);
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -94,6 +100,7 @@ export async function GET(request: Request) {
       if (tokenHash) {
         params.set("token_hash", tokenHash);
       }
+      appendRedirectParam(params, safeRedirect);
       return NextResponse.redirect(`${origin}/auth/verify?${params.toString()}`);
     }
     const params = new URLSearchParams();
@@ -104,8 +111,31 @@ export async function GET(request: Request) {
     if (authError.message) {
       params.set("error_description", authError.message);
     }
+    appendRedirectParam(params, safeRedirect);
     return NextResponse.redirect(`${origin}/login?${params.toString()}`);
   }
 
   return response;
+}
+
+function sanitizeRedirect(value: string | null) {
+  if (!value) {
+    return "/";
+  }
+  if (!value.startsWith("/")) {
+    return "/";
+  }
+  if (value.startsWith("//")) {
+    return "/";
+  }
+  if (value.toLowerCase().includes("http")) {
+    return "/";
+  }
+  return value;
+}
+
+function appendRedirectParam(params: URLSearchParams, redirectPath: string) {
+  if (redirectPath && redirectPath !== "/") {
+    params.set("redirect", redirectPath);
+  }
 }

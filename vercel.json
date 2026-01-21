@@ -1,0 +1,8 @@
+{
+  "cron": [
+    {
+      "path": "/api/cron/quiet-invite",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}

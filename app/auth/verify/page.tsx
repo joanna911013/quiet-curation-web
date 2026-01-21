@@ -10,6 +10,8 @@ export default function AuthVerifyPage() {
 
   useEffect(() => {
     let isActive = true;
+    const redirectParam = searchParams.get("redirect");
+    const safeRedirect = sanitizeRedirect(redirectParam);
 
     const redirectWithError = (error: {
       code?: string | null;
@@ -23,6 +25,9 @@ export default function AuthVerifyPage() {
       }
       if (error.message) {
         params.set("error_description", error.message);
+      }
+      if (safeRedirect !== "/") {
+        params.set("redirect", safeRedirect);
       }
       router.replace(`/login?${params.toString()}`);
     };
@@ -68,7 +73,7 @@ export default function AuthVerifyPage() {
           redirectWithError({ code: error.code, message: error.message });
           return;
         }
-        router.replace("/");
+        router.replace(safeRedirect);
         return;
       }
 
@@ -89,7 +94,7 @@ export default function AuthVerifyPage() {
         return;
       }
       if (data?.session) {
-        router.replace("/");
+        router.replace(safeRedirect);
         return;
       }
 
@@ -113,4 +118,20 @@ export default function AuthVerifyPage() {
       </div>
     </main>
   );
+}
+
+function sanitizeRedirect(value: string | null) {
+  if (!value) {
+    return "/";
+  }
+  if (!value.startsWith("/")) {
+    return "/";
+  }
+  if (value.startsWith("//")) {
+    return "/";
+  }
+  if (value.toLowerCase().includes("http")) {
+    return "/";
+  }
+  return value;
 }

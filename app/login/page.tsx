@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabaseClient";
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const redirectParam = searchParams.get("redirect");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -20,6 +21,7 @@ export default function LoginPage() {
     searchParams.get("error") ||
     "";
   const displayError = error || (!dismissQueryError ? queryError : "");
+  const safeRedirect = sanitizeRedirect(redirectParam);
 
   useEffect(() => {
     let isActive = true;
@@ -30,7 +32,7 @@ export default function LoginPage() {
         return;
       }
       if (data?.user) {
-        router.replace("/");
+        router.replace(safeRedirect);
       }
     };
 
@@ -39,7 +41,7 @@ export default function LoginPage() {
     return () => {
       isActive = false;
     };
-  }, [router]);
+  }, [router, safeRedirect]);
 
   const handleContinue = async () => {
     if (!email.includes("@")) {
@@ -49,10 +51,12 @@ export default function LoginPage() {
     setError("");
     setDismissQueryError(true);
     setIsSending(true);
+    const callbackUrl = new URL("/auth/callback", window.location.origin);
+    callbackUrl.searchParams.set("redirect", safeRedirect);
     const { error: signInError } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: callbackUrl.toString(),
       },
     });
     if (signInError) {
@@ -111,4 +115,20 @@ export default function LoginPage() {
       </div>
     </main>
   );
+}
+
+function sanitizeRedirect(value: string | null) {
+  if (!value) {
+    return "/";
+  }
+  if (!value.startsWith("/")) {
+    return "/";
+  }
+  if (value.startsWith("//")) {
+    return "/";
+  }
+  if (value.toLowerCase().includes("http")) {
+    return "/";
+  }
+  return value;
 }
