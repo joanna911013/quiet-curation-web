@@ -29,6 +29,9 @@ export async function GET(request: Request) {
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const siteUrl = process.env.SITE_URL;
   const fallbackCurationId = process.env.FALLBACK_CURATION_ID;
+  const emailProvider = (process.env.EMAIL_PROVIDER ?? "dryrun").toLowerCase();
+  const isDryRun = process.env.EMAIL_DRY_RUN === "true";
+  const cronDebug = process.env.CRON_DEBUG === "true";
 
   if (!supabaseUrl || !supabaseKey || !siteUrl) {
     return NextResponse.json(
@@ -62,7 +65,9 @@ export async function GET(request: Request) {
   const { data: recipients, error: recipientsError } = await supabase
     .from("profiles")
     .select("id, email, notification_opt_in")
-    .eq("notification_opt_in", true);
+    .eq("notification_opt_in", true)
+    .not("email", "is", null)
+    .neq("email", "");
 
   if (recipientsError) {
     return NextResponse.json(
@@ -84,8 +89,16 @@ export async function GET(request: Request) {
   const recipientById = new Map(
     (recipients ?? []).map((recipient) => [recipient.id, recipient]),
   );
+  const recipientIds = (recipients ?? []).map((recipient) => recipient.id);
 
   for (const recipient of recipients ?? []) {
+    const recipientEmail = recipient.email?.trim();
+
+    if (!recipientEmail) {
+      summary.skipped += 1;
+      continue;
+    }
+
     const { data, error } = await supabase
       .from("invite_deliveries")
       .insert({
@@ -114,20 +127,6 @@ export async function GET(request: Request) {
     }
 
     summary.inserted += 1;
-    const recipientEmail = recipient.email?.trim();
-
-    if (!recipientEmail) {
-      summary.failed += 1;
-      await markInviteFailed(supabase, {
-        inviteId: data.id,
-        userId: data.user_id,
-        deliveryDate,
-        errorMessage: "missing_email",
-        retryCount: data.retry_count,
-      });
-      continue;
-    }
-
     await markInviteAttempt(supabase, data.id);
     const sendResult = await sendInviteEmail({
       recipient: { id: data.user_id, email: recipientEmail },
@@ -150,12 +149,21 @@ export async function GET(request: Request) {
     }
   }
 
+  if (!recipientIds.length) {
+    return NextResponse.json({
+      ok: true,
+      summary,
+      ...(cronDebug && { emailProvider, isDryRun }),
+    });
+  }
+
   const { data: failedRows, error: failedError } = await supabase
     .from("invite_deliveries")
     .select("id, user_id, retry_count, curation_id")
     .eq("delivery_date", deliveryDate)
     .in("status", ["failed", "pending"])
-    .lt("retry_count", MAX_RETRIES);
+    .lt("retry_count", MAX_RETRIES)
+    .in("user_id", recipientIds);
 
   if (failedError) {
     return NextResponse.json(
@@ -165,22 +173,15 @@ export async function GET(request: Request) {
   }
 
   for (const row of failedRows ?? []) {
-    summary.retried += 1;
     const retryRecipient = recipientById.get(row.user_id);
     const retryEmail = retryRecipient?.email?.trim();
 
     if (!retryEmail) {
-      summary.failed += 1;
-      await markInviteFailed(supabase, {
-        inviteId: row.id,
-        userId: row.user_id,
-        deliveryDate,
-        errorMessage: "missing_email",
-        retryCount: row.retry_count,
-      });
+      summary.skipped += 1;
       continue;
     }
 
+    summary.retried += 1;
     await markInviteAttempt(supabase, row.id);
     const retryResult = await sendInviteEmail({
       recipient: { id: row.user_id, email: retryEmail },
@@ -203,7 +204,11 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true, summary });
+  return NextResponse.json({
+    ok: true,
+    summary,
+    ...(cronDebug && { emailProvider, isDryRun }),
+  });
 }
 
 async function fetchTodayPairingId(

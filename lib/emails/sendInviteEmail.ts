@@ -37,16 +37,23 @@ type SendInviteEmailInput = {
   siteUrl: string;
 };
 
-type SendInviteEmailResult = SendEmailResult & { error?: string };
+type SendInviteEmailResult = SendEmailResult;
 
 export async function sendInviteEmail(
   input: SendInviteEmailInput,
 ): Promise<SendInviteEmailResult> {
   const { recipient, curation, pairing, siteUrl } = input;
+  const recipientEmail = recipient.email?.trim();
+
+  if (!recipientEmail) {
+    return { ok: false, error: "Recipient email is missing" };
+  }
+  const provider = (process.env.EMAIL_PROVIDER ?? "dryrun").toLowerCase();
   const logContext = {
     userId: recipient.id,
-    email: recipient.email,
+    email: recipientEmail,
     curationId: curation.id,
+    provider,
   };
 
   try {
@@ -57,7 +64,7 @@ export async function sendInviteEmail(
       siteUrl,
     });
     const result = await sendEmail({
-      to: recipient.email,
+      to: recipientEmail,
       subject,
       html,
     });
@@ -65,21 +72,16 @@ export async function sendInviteEmail(
     if (result.ok) {
       console.log("[quiet-invite] send success:", {
         ...logContext,
-        provider: result.provider,
+        id: result.id,
       });
       return result;
     }
 
     console.error("[quiet-invite] send failure:", {
       ...logContext,
-      provider: result.provider,
       error: result.error,
     });
-    return {
-      ok: false,
-      provider: result.provider,
-      error: result.error,
-    };
+    return result;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error.";
     console.error("[quiet-invite] send failure:", {
@@ -88,7 +90,6 @@ export async function sendInviteEmail(
     });
     return {
       ok: false,
-      provider: "unknown",
       error: message,
     };
   }

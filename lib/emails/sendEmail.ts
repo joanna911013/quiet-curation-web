@@ -1,52 +1,49 @@
-type SendEmailInput = {
+type SendEmailParams = {
   to: string;
   subject: string;
   html: string;
 };
 
-type SendEmailSuccess = {
-  ok: true;
-  provider: string;
-  id?: string;
-};
-
-type SendEmailFailure = {
-  ok: false;
-  provider: string;
-  error: string;
-};
-
-export type SendEmailResult = SendEmailSuccess | SendEmailFailure;
+export type SendEmailResult =
+  | { ok: true; id?: string }
+  | { ok: false; error: string };
 
 export async function sendEmail(
-  input: SendEmailInput,
+  params: SendEmailParams,
 ): Promise<SendEmailResult> {
-  const provider =
-    (process.env.EMAIL_PROVIDER ?? "resend").toLowerCase().trim();
+  const provider = (process.env.EMAIL_PROVIDER ?? "dryrun").toLowerCase();
+  const dryRun = provider === "dryrun" || process.env.EMAIL_DRY_RUN === "true";
 
-  try {
-    if (provider === "resend") {
-      return await sendWithResend(input);
-    }
-    if (provider === "sendgrid") {
-      return await sendWithSendGrid(input);
-    }
-    return {
-      ok: false,
-      provider,
-      error: "Unsupported email provider.",
-    };
-  } catch (error) {
-    return {
-      ok: false,
-      provider,
-      error: normalizeError(error),
-    };
+  if (dryRun) {
+    console.log("[email][dryrun]", {
+      to: params.to,
+      subject: params.subject,
+      htmlLength: params.html.length,
+    });
+    return { ok: true, id: "dryrun" };
   }
+
+  if (provider === "resend") {
+    try {
+      return await sendWithResend(params);
+    } catch (error) {
+      return { ok: false, error: normalizeError(error) };
+    }
+  }
+
+  if (provider === "sendgrid") {
+    try {
+      return await sendWithSendGrid(params);
+    } catch (error) {
+      return { ok: false, error: normalizeError(error) };
+    }
+  }
+
+  return { ok: false, error: `Unknown EMAIL_PROVIDER: ${provider}` };
 }
 
 async function sendWithResend(
-  input: SendEmailInput,
+  params: SendEmailParams,
 ): Promise<SendEmailResult> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM || process.env.EMAIL_FROM;
@@ -54,8 +51,7 @@ async function sendWithResend(
   if (!apiKey || !from) {
     return {
       ok: false,
-      provider: "resend",
-      error: "Missing RESEND_API_KEY or RESEND_FROM.",
+      error: "Missing RESEND_API_KEY or RESEND_FROM/EMAIL_FROM",
     };
   }
 
@@ -67,9 +63,9 @@ async function sendWithResend(
     },
     body: JSON.stringify({
       from,
-      to: input.to,
-      subject: input.subject,
-      html: input.html,
+      to: params.to,
+      subject: params.subject,
+      html: params.html,
     }),
   });
 
@@ -77,7 +73,6 @@ async function sendWithResend(
     const message = await readErrorMessage(response);
     return {
       ok: false,
-      provider: "resend",
       error: message || `Resend error (${response.status}).`,
     };
   }
@@ -86,11 +81,11 @@ async function sendWithResend(
     | { id?: string }
     | null;
 
-  return { ok: true, provider: "resend", id: data?.id };
+  return { ok: true, id: data?.id };
 }
 
 async function sendWithSendGrid(
-  input: SendEmailInput,
+  params: SendEmailParams,
 ): Promise<SendEmailResult> {
   const apiKey = process.env.SENDGRID_API_KEY;
   const from = process.env.SENDGRID_FROM || process.env.EMAIL_FROM;
@@ -98,8 +93,7 @@ async function sendWithSendGrid(
   if (!apiKey || !from) {
     return {
       ok: false,
-      provider: "sendgrid",
-      error: "Missing SENDGRID_API_KEY or SENDGRID_FROM.",
+      error: "Missing SENDGRID_API_KEY or SENDGRID_FROM/EMAIL_FROM",
     };
   }
 
@@ -110,10 +104,10 @@ async function sendWithSendGrid(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      personalizations: [{ to: [{ email: input.to }] }],
+      personalizations: [{ to: [{ email: params.to }] }],
       from: { email: from },
-      subject: input.subject,
-      content: [{ type: "text/html", value: input.html }],
+      subject: params.subject,
+      content: [{ type: "text/html", value: params.html }],
     }),
   });
 
@@ -121,12 +115,11 @@ async function sendWithSendGrid(
     const message = await readErrorMessage(response);
     return {
       ok: false,
-      provider: "sendgrid",
       error: message || `SendGrid error (${response.status}).`,
     };
   }
 
-  return { ok: true, provider: "sendgrid" };
+  return { ok: true };
 }
 
 async function readErrorMessage(response: Response) {
