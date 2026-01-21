@@ -37,8 +37,6 @@ export async function GET(request: Request) {
 
   const normalizedSiteUrl = siteUrl.replace(/\/$/, "");
   const deliveryDate = getSeoulDateString();
-  const runStartedAt = new Date().toISOString();
-
   const supabase = createClient(supabaseUrl, supabaseKey, {
     auth: { persistSession: false },
   });
@@ -116,7 +114,7 @@ export async function GET(request: Request) {
 
     if (sendResult.ok) {
       summary.sent += 1;
-      await markInviteSent(supabase, data.id, runStartedAt);
+      await markInviteSent(supabase, data.id);
     } else {
       summary.failed += 1;
       await markInviteFailed(supabase, {
@@ -153,7 +151,7 @@ export async function GET(request: Request) {
 
     if (retryResult.ok) {
       summary.sent += 1;
-      await markInviteSent(supabase, row.id, runStartedAt);
+      await markInviteSent(supabase, row.id);
     } else {
       summary.failed += 1;
       await markInviteFailed(supabase, {
@@ -216,12 +214,9 @@ async function sendInvite(
   }
 }
 
-async function markInviteSent(
-  client: SupabaseClient,
-  inviteId: string,
-  nowIso: string,
-) {
-  await client
+async function markInviteSent(client: SupabaseClient, inviteId: string) {
+  const nowIso = new Date().toISOString();
+  const { data, error } = await client
     .from("invite_deliveries")
     .update({
       status: "sent",
@@ -229,7 +224,19 @@ async function markInviteSent(
       last_attempt_at: nowIso,
       updated_at: nowIso,
     })
-    .eq("id", inviteId);
+    .eq("id", inviteId)
+    .select("id, status, last_attempt_at")
+    .single();
+
+  if (error) {
+    console.error("[quiet-invite] markInviteSent failed:", {
+      inviteId,
+      error,
+    });
+    return;
+  }
+
+  console.log("[quiet-invite] markInviteSent ok:", data);
 }
 
 async function markInviteFailed(
@@ -246,21 +253,14 @@ async function markInviteFailed(
   const nextRetry = (params.retryCount ?? 0) + 1;
 
   if (!params.inviteId) {
-    await client.from("invite_deliveries").insert({
-      user_id: params.userId,
-      delivery_date: params.deliveryDate,
-      channel: DEFAULT_CHANNEL,
-      curation_id: "unknown",
-      status: "failed",
-      error_message: params.errorMessage,
-      retry_count: nextRetry,
-      last_attempt_at: nowIso,
-      updated_at: nowIso,
+    console.error("[quiet-invite] markInviteFailed skipped: missing inviteId", {
+      userId: params.userId,
+      deliveryDate: params.deliveryDate,
     });
     return;
   }
 
-  await client
+  const { error } = await client
     .from("invite_deliveries")
     .update({
       status: "failed",
@@ -270,4 +270,11 @@ async function markInviteFailed(
       updated_at: nowIso,
     })
     .eq("id", params.inviteId);
+
+  if (error) {
+    console.error("[quiet-invite] markInviteFailed failed:", {
+      inviteId: params.inviteId,
+      error,
+    });
+  }
 }
