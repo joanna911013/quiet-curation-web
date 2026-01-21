@@ -216,27 +216,19 @@ async function sendInvite(
 
 async function markInviteSent(client: SupabaseClient, inviteId: string) {
   const nowIso = new Date().toISOString();
-  const { data, error } = await client
+  const { error } = await client
     .from("invite_deliveries")
     .update({
       status: "sent",
       error_message: null,
       last_attempt_at: nowIso,
-      updated_at: nowIso,
     })
-    .eq("id", inviteId)
-    .select("id, status, last_attempt_at")
-    .single();
+    .eq("id", inviteId);
 
   if (error) {
-    console.error("[quiet-invite] markInviteSent failed:", {
-      inviteId,
-      error,
-    });
+    console.error("[quiet-invite] markInviteSent failed:", error);
     return;
   }
-
-  console.log("[quiet-invite] markInviteSent ok:", data);
 }
 
 async function markInviteFailed(
@@ -267,7 +259,6 @@ async function markInviteFailed(
       error_message: params.errorMessage,
       retry_count: nextRetry,
       last_attempt_at: nowIso,
-      updated_at: nowIso,
     })
     .eq("id", params.inviteId);
 
