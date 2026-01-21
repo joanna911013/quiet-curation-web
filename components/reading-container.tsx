@@ -9,6 +9,8 @@ type ReadingContainerBaseProps = {
   meta: string;
   onToggleSave: () => void;
   saved?: boolean;
+  saveDisabled?: boolean;
+  statusMessage?: string;
   onBack?: () => void;
 };
 
@@ -42,6 +44,8 @@ export function ReadingContainer({
   children,
   onToggleSave,
   saved = false,
+  saveDisabled = false,
+  statusMessage,
   onBack,
 }: ReadingContainerProps) {
   const handleBack = () => {
@@ -75,7 +79,9 @@ export function ReadingContainer({
           <IconButton
             ariaLabel={saved ? "Remove bookmark" : "Save"}
             isActive={saved}
+            ariaPressed={saved}
             onClick={onToggleSave}
+            disabled={saveDisabled}
           />
         </div>
       </header>
@@ -84,6 +90,9 @@ export function ReadingContainer({
           <h1 className="readingTitle">{title}</h1>
           <div className="readingMetaLine">{authorOrSourceLine}</div>
           {content}
+          {statusMessage ? (
+            <p className="text-xs text-rose-500">{statusMessage}</p>
+          ) : null}
           <div className="readingFootnote">{meta}</div>
         </div>
       </div>

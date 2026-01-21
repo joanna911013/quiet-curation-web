@@ -1,39 +1,130 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/button";
 import { ContentCard } from "@/components/content-card";
+import { supabase } from "@/lib/supabaseClient";
 
-const mockContent = [
-  {
-    id: "1",
-    title: "The Slow Light",
-    preview:
-      "A short reflection on returning to the same sentence until it feels like home.",
-    source: "Quiet Notes",
-  },
-  {
-    id: "2",
-    title: "Weather for Interior Rooms",
-    preview:
-      "A small practice for noticing the weather inside you before the day begins.",
-    source: "Signal & Silence",
-  },
-  {
-    id: "3",
-    title: "A Few Lines Before Noon",
-    preview: "A poem about attention, stillness, and small rituals.",
-    source: "An Index of Small Things",
-  },
-];
+type PairingSummary = {
+  id: string;
+  pairing_date: string;
+  literature_text: string;
+  literature_source: string | null;
+  literature_author: string | null;
+  literature_work: string | null;
+  literature_title: string | null;
+  rationale_short: string | null;
+  locale: string;
+};
 
 export default function HomePage() {
   const router = useRouter();
-  const [savedIds, setSavedIds] = useState<string[]>(["2"]);
+  const [pairings, setPairings] = useState<PairingSummary[]>([]);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
+  const [savingIds, setSavingIds] = useState<string[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const isLoading = false;
-  const errorMessage = "";
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchPairings = async () => {
+      setIsLoading(true);
+      setErrorMessage("");
+
+      const { data: userData, error: userError } =
+        await supabase.auth.getUser();
+
+      if (!isActive) {
+        return;
+      }
+
+      if (userError || !userData?.user?.id) {
+        setErrorMessage("Please sign in again.");
+        setIsLoading(false);
+        return;
+      }
+
+      const resolvedUserId = userData.user.id;
+      setUserId(resolvedUserId);
+
+      const locale =
+        typeof navigator !== "undefined" &&
+        navigator.language?.toLowerCase().startsWith("ko")
+          ? "ko"
+          : "en";
+
+      const pairingSelect =
+        "id, pairing_date, literature_text, literature_source, literature_author, literature_work, literature_title, rationale_short, locale";
+
+      let { data: pairingData, error: pairingError } = await supabase
+        .from("pairings")
+        .select(pairingSelect)
+        .eq("status", "approved")
+        .eq("locale", locale)
+        .order("pairing_date", { ascending: false })
+        .limit(6);
+
+      if (!pairingError && (pairingData?.length ?? 0) === 0) {
+        const fallback = await supabase
+          .from("pairings")
+          .select(pairingSelect)
+          .eq("status", "approved")
+          .order("pairing_date", { ascending: false })
+          .limit(6);
+
+        pairingData = fallback.data ?? [];
+        pairingError = fallback.error ?? null;
+      }
+
+      if (!isActive) {
+        return;
+      }
+
+      if (pairingError) {
+        setErrorMessage("Unable to load readings.");
+        setIsLoading(false);
+        return;
+      }
+
+      const resolvedPairings = pairingData ?? [];
+      setPairings(resolvedPairings);
+
+      if (resolvedPairings.length > 0) {
+        const { data: savedData, error: savedError } = await supabase
+          .from("saved_items")
+          .select("pairing_id")
+          .eq("user_id", resolvedUserId)
+          .in(
+            "pairing_id",
+            resolvedPairings.map((pairing) => pairing.id),
+          );
+
+        if (!isActive) {
+          return;
+        }
+
+        if (savedError) {
+          console.error("Unable to load saved items.", savedError);
+          setSavedIds([]);
+        } else {
+          setSavedIds(savedData?.map((item) => item.pairing_id) ?? []);
+        }
+      } else {
+        setSavedIds([]);
+      }
+
+      setIsLoading(false);
+    };
+
+    void fetchPairings();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   if (isLoading) {
     return (
@@ -51,10 +142,60 @@ export default function HomePage() {
     );
   }
 
-  const toggleSaved = (id: string) => {
+  const toggleSaved = async (pairingId: string) => {
+    if (!userId) {
+      setErrorMessage("Please sign in again.");
+      return;
+    }
+    if (savingIds.includes(pairingId)) {
+      return;
+    }
+
+    const nextSaved = !savedIds.includes(pairingId);
+
     setSavedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+      nextSaved
+        ? [...prev, pairingId]
+        : prev.filter((item) => item !== pairingId),
     );
+    setSavingIds((prev) => [...prev, pairingId]);
+
+    if (nextSaved) {
+      const { error } = await supabase.from("saved_items").upsert(
+        {
+          user_id: userId,
+          pairing_id: pairingId,
+        },
+        {
+          onConflict: "user_id,pairing_id",
+          ignoreDuplicates: true,
+        },
+      );
+
+      if (error) {
+        console.error("Unable to save item.", error);
+        setSavedIds((prev) => prev.filter((item) => item !== pairingId));
+        setSavingIds((prev) => prev.filter((item) => item !== pairingId));
+        return;
+      }
+
+      setSavingIds((prev) => prev.filter((item) => item !== pairingId));
+      return;
+    }
+
+    const { error } = await supabase
+      .from("saved_items")
+      .delete()
+      .eq("user_id", userId)
+      .eq("pairing_id", pairingId);
+
+    if (error) {
+      console.error("Unable to remove saved item.", error);
+      setSavedIds((prev) =>
+        prev.includes(pairingId) ? prev : [...prev, pairingId],
+      );
+    }
+    setSavingIds((prev) => prev.filter((item) => item !== pairingId));
   };
 
   return (
@@ -70,22 +211,35 @@ export default function HomePage() {
       </header>
 
       <section className="flex flex-col gap-4">
-        {mockContent.length === 0 ? (
+        {pairings.length === 0 ? (
           <div className="rounded-2xl border border-neutral-200/80 p-5 text-sm text-neutral-500">
             No readings yet. Check back soon.
           </div>
         ) : (
-          mockContent.map((item) => (
+          pairings.map((item) => {
+            const previewText = item.rationale_short?.trim()
+              ? item.rationale_short
+              : item.literature_text.split("\n").find(Boolean) ||
+                "A quiet reading for today.";
+            const sourceText =
+              item.literature_source ||
+              item.literature_author ||
+              item.literature_work ||
+              "Quiet Curation";
+            const titleText = item.literature_title || "Daily pairing";
+
+            return (
             <ContentCard
               key={item.id}
-              title={item.title}
-              preview={item.preview}
-              source={item.source}
+              title={titleText}
+              preview={previewText}
+              source={sourceText}
               saved={savedIds.includes(item.id)}
               onOpen={() => router.push(`/c/${item.id}`)}
               onToggleSave={() => toggleSaved(item.id)}
             />
-          ))
+            );
+          })
         )}
       </section>
 

@@ -8,6 +8,7 @@ type IconButtonProps = {
   ariaLabel: string;
   isActive?: boolean;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  disabled?: boolean;
   size?: number;
   ariaPressed?: boolean;
   className?: string;
@@ -52,6 +53,7 @@ export function IconButton({
   ariaLabel,
   isActive = false,
   onClick,
+  disabled = false,
   size,
   ariaPressed,
   className,
@@ -64,7 +66,7 @@ export function IconButton({
       aria-label={ariaLabel}
       aria-pressed={ariaPressed}
       onClick={onClick}
-      disabled={!onClick}
+      disabled={disabled || !onClick}
       className={joinClassNames(
         "iconButton",
         isActive ? "iconButtonActive" : "iconButtonInactive",

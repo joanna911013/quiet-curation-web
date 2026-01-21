@@ -1,89 +1,100 @@
-"use client";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createSupabaseServer } from "@/lib/supabaseServer";
+import { DetailView } from "./detail-view";
 
-import React, { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Button } from "@/components/button";
-import { ReadingContainer } from "@/components/reading-container";
+export const dynamic = "force-dynamic";
 
-const mockContent = [
-  {
-    id: "1",
-    title: "The Slow Light",
-    preview:
-      "A short reflection on returning to the same sentence until it feels like home.",
-    source: "Quiet Notes",
-  },
-  {
-    id: "2",
-    title: "Weather for Interior Rooms",
-    preview:
-      "A small practice for noticing the weather inside you before the day begins.",
-    source: "Signal & Silence",
-  },
-  {
-    id: "3",
-    title: "A Few Lines Before Noon",
-    preview: "A poem about attention, stillness, and small rituals.",
-    source: "An Index of Small Things",
-  },
-];
+type PageProps = {
+  params: Promise<{ id: string }>;
+};
 
-const bodyText =
-  "The day does not need to be explained. It asks only to be met, one sentence at a time.\n\n"
-  +
-  "Let the first line settle, then the next. This is not urgency, but a slow unfolding. "
-  +
-  "Return to the phrases that soften your shoulders. Let them become familiar.\n\n"
-  +
-  "When the room feels louder than it should, this is a place to pause. "
-  +
-  "Breathe until the edges of the page feel steady. You are allowed to begin again.";
+type PairingDetail = {
+  id: string;
+  pairing_date: string | null;
+  literature_text: string | null;
+  literature_source: string | null;
+  literature_author: string | null;
+  literature_work: string | null;
+  literature_title: string | null;
+};
 
-export default function DetailPage() {
-  const router = useRouter();
-  const { id } = useParams<{ id: string }>();
-  const [saved, setSaved] = useState(false);
-  const isLoading = false;
-  const errorMessage = "";
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-  if (isLoading) {
+export default async function DetailPage({ params }: PageProps) {
+  const { id: pairingId } = await params;
+  if (!pairingId || !UUID_REGEX.test(pairingId)) {
     return (
       <main className="mx-auto w-full max-w-xl px-5 pb-16 pt-8">
-        <p className="text-sm text-neutral-500">Loading reading...</p>
-      </main>
-    );
-  }
-
-  if (errorMessage) {
-    return (
-      <main className="mx-auto w-full max-w-xl px-5 pb-16 pt-8">
-        <p className="text-sm text-neutral-500">{errorMessage}</p>
-      </main>
-    );
-  }
-
-  const content = mockContent.find((item) => item.id === id);
-
-  if (!content) {
-    return (
-      <main className="mx-auto flex w-full max-w-xl flex-col gap-4 px-5 pb-16 pt-8">
         <p className="text-sm text-neutral-500">Reading not found.</p>
-        <Button variant="ghost" onClick={() => router.push("/")}>
+        <Link
+          href="/"
+          className="mt-4 inline-flex text-xs text-neutral-500 underline"
+        >
           Back to Home
-        </Button>
+        </Link>
       </main>
     );
+  }
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: pairing, error: pairingError } = await supabase
+    .from("pairings")
+    .select("*")
+    .eq("status", "approved")
+    .eq("id", pairingId)
+    .maybeSingle();
+
+  if (pairingError) {
+    console.error("Failed to load pairing detail.", pairingError);
+    return (
+      <main className="mx-auto w-full max-w-xl px-5 pb-16 pt-8">
+        <p className="text-sm text-neutral-500">Unable to load reading.</p>
+        <Link
+          href="/"
+          className="mt-4 inline-flex text-xs text-neutral-500 underline"
+        >
+          Back to Home
+        </Link>
+      </main>
+    );
+  }
+
+  if (!pairing) {
+    return (
+      <main className="mx-auto w-full max-w-xl px-5 pb-16 pt-8">
+        <p className="text-sm text-neutral-500">Reading not found.</p>
+        <Link href="/" className="mt-4 inline-flex text-xs text-neutral-500 underline">
+          Back to Home
+        </Link>
+      </main>
+    );
+  }
+
+  const { data: savedRow, error: savedError } = await supabase
+    .from("saved_items")
+    .select("created_at")
+    .eq("user_id", user.id)
+    .eq("pairing_id", pairingId)
+    .maybeSingle();
+
+  if (savedError) {
+    console.error("Unable to load saved state.", savedError);
   }
 
   return (
-    <ReadingContainer
-      title={content.title}
-      authorOrSourceLine={content.source}
-      meta={`Source: ${content.source} · ID ${content.id}`}
-      body={bodyText}
-      saved={saved}
-      onToggleSave={() => setSaved((prev) => !prev)}
-      onBack={() => router.back()}
+    <DetailView
+      pairing={pairing as PairingDetail}
+      initialSaved={Boolean(savedRow)}
+      initialSavedAt={savedRow?.created_at ?? null}
     />
   );
 }

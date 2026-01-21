@@ -1,0 +1,29 @@
+[
+  {
+    "locale": "en",
+    "translation": "NIV",
+    "book": "Psalms",
+    "chapter": 23,
+    "verse": 1,
+    "canonical_ref": "Psalms 23:1",
+    "verse_text": "DUMMY_TEXT_FOR_PIPELINE_TEST_ONLY"
+  },
+  {
+    "locale": "en",
+    "translation": "NIV",
+    "book": "John",
+    "chapter": 3,
+    "verse": 16,
+    "canonical_ref": "John 3:16",
+    "verse_text": "DUMMY_TEXT_FOR_PIPELINE_TEST_ONLY"
+  },
+  {
+    "locale": "en",
+    "translation": "NIV",
+    "book": "Philippians",
+    "chapter": 4,
+    "verse": 6,
+    "canonical_ref": "Philippians 4:6",
+    "verse_text": "DUMMY_TEXT_FOR_PIPELINE_TEST_ONLY"
+  }
+]

@@ -1,45 +1,68 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/button";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
-  const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [linkSent, setLinkSent] = useState(false);
+  const [dismissQueryError, setDismissQueryError] = useState(false);
+
+  const queryError =
+    searchParams.get("error_description") ||
+    searchParams.get("error_code") ||
+    searchParams.get("error") ||
+    "";
+  const displayError = error || (!dismissQueryError ? queryError : "");
 
   useEffect(() => {
-    const hasSession = window.localStorage.getItem("qc:authed") === "1";
-    if (hasSession) {
-      router.replace("/");
-      return;
-    }
-    setIsReady(true);
+    let isActive = true;
+
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!isActive) {
+        return;
+      }
+      if (data?.user) {
+        router.replace("/");
+      }
+    };
+
+    void checkSession();
+
+    return () => {
+      isActive = false;
+    };
   }, [router]);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!email.includes("@")) {
       setError("Enter a valid email address.");
       return;
     }
-    window.localStorage.setItem("qc:authed", "1");
-    router.push("/");
+    setError("");
+    setDismissQueryError(true);
+    setIsSending(true);
+    const { error: signInError } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (signInError) {
+      setError(signInError.message || "Unable to send magic link.");
+      setIsSending(false);
+      return;
+    }
+    setLinkSent(true);
+    setIsSending(false);
   };
-
-  if (!isReady) {
-    return (
-      <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-        <div className="mx-auto flex w-full max-w-md flex-col gap-2 px-5 pb-16 pt-10">
-          <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
-            Quiet Curation
-          </p>
-          <p className="text-sm text-neutral-500">Loading...</p>
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -63,26 +86,28 @@ export default function LoginPage() {
             onChange={(event) => {
               setEmail(event.target.value);
               setError("");
+              setLinkSent(false);
+              setDismissQueryError(true);
             }}
             className="h-11 rounded-xl border border-neutral-200 bg-transparent px-4 text-base outline-none focus:border-neutral-400"
           />
         </label>
 
-        <Button onClick={handleContinue} disabled={!email}>
-          Send magic link
+        <Button onClick={handleContinue} disabled={!email || isSending}>
+          {linkSent ? "Link sent" : "Send magic link"}
         </Button>
 
-        {error ? (
-          <p className="text-xs text-rose-500">{error}</p>
+        {displayError ? (
+          <p className="text-xs text-rose-500">{displayError}</p>
+        ) : linkSent ? (
+          <p className="text-xs text-neutral-400">
+            Check your inbox for a sign-in link.
+          </p>
         ) : (
           <p className="text-xs text-neutral-400">
             Enter an email to continue.
           </p>
         )}
-
-        <p className="text-xs text-neutral-400">
-          This MVP uses mock auth only.
-        </p>
       </div>
     </main>
   );
