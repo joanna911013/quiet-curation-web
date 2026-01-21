@@ -5,8 +5,14 @@ export const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 );
 
+type AuthStorage = {
+  getItem: (key: string) => Promise<string | null> | string | null;
+  setItem: (key: string, value: string) => Promise<void> | void;
+  removeItem: (key: string) => Promise<void> | void;
+};
+
 if (typeof window !== "undefined") {
-  const storage = supabase.auth.storage;
+  const storage = (supabase.auth as unknown as { storage: AuthStorage }).storage;
   const codeVerifierSuffix = "-code-verifier";
   const originalGetItem = storage.getItem.bind(storage);
   const originalSetItem = storage.setItem.bind(storage);

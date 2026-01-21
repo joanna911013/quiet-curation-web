@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 export const runtime = "nodejs";
 
@@ -170,7 +170,7 @@ export async function GET(request: Request) {
 }
 
 async function fetchTodayPairingId(
-  client: ReturnType<typeof createClient>,
+  client: SupabaseClient,
   date: string,
   locale: string,
 ) {
@@ -217,7 +217,7 @@ async function sendInvite(
 }
 
 async function markInviteSent(
-  client: ReturnType<typeof createClient>,
+  client: SupabaseClient,
   inviteId: string,
   nowIso: string,
 ) {
@@ -233,7 +233,7 @@ async function markInviteSent(
 }
 
 async function markInviteFailed(
-  client: ReturnType<typeof createClient>,
+  client: SupabaseClient,
   params: {
     inviteId: string | null;
     userId: string;

@@ -50,10 +50,13 @@ export function SaveButton({
       }
 
       if (nextSaved && "createdAt" in result) {
+        const createdAtValue = (result as { createdAt?: unknown }).createdAt;
         onSavedChange({
           saved: true,
           savedAt:
-            result.createdAt ?? previousSavedAt ?? new Date().toISOString(),
+            typeof createdAtValue === "string"
+              ? createdAtValue
+              : previousSavedAt ?? new Date().toISOString(),
         });
       }
     } catch (error) {

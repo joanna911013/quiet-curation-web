@@ -168,33 +168,33 @@ export default async function SavedPage() {
       versesById = new Map(verses.map((verse) => [verse.id, verse]));
     }
 
-    savedListItems = savedItems
-      .map((savedItem) => {
-        const pairing = pairingsById.get(savedItem.pairing_id);
-        if (!pairing) {
-          return null;
-        }
-        const verse = versesById.get(pairing.verse_id);
-        const verseReference = formatVerseReference(verse);
-        const resolvedVerseText =
-          verse?.verse_text?.trim() || verse?.text?.trim() || "";
-        const verseText = resolvedVerseText
-          ? truncateText(resolvedVerseText, 160)
-          : "Verse text unavailable.";
-        const literatureLine = buildLiteratureLine(pairing);
-        const pairingTitle =
-          pairing.literature_title ||
-          pairing.literature_work ||
-          "Daily pairing";
-        const pairingSource =
-          pairing.literature_author ||
-          pairing.literature_source ||
-          "Quiet Curation";
-        const sourceLine = pairingSource
-          ? `${pairingSource} · ${verseReference}`
-          : verseReference;
+    savedListItems = savedItems.flatMap((savedItem) => {
+      const pairing = pairingsById.get(savedItem.pairing_id);
+      if (!pairing) {
+        return [];
+      }
+      const verse = versesById.get(pairing.verse_id);
+      const verseReference = formatVerseReference(verse);
+      const resolvedVerseText =
+        verse?.verse_text?.trim() || verse?.text?.trim() || "";
+      const verseText = resolvedVerseText
+        ? truncateText(resolvedVerseText, 160)
+        : "Verse text unavailable.";
+      const literatureLine = buildLiteratureLine(pairing);
+      const pairingTitle =
+        pairing.literature_title ||
+        pairing.literature_work ||
+        "Daily pairing";
+      const pairingSource =
+        pairing.literature_author ||
+        pairing.literature_source ||
+        "Quiet Curation";
+      const sourceLine = pairingSource
+        ? `${pairingSource} · ${verseReference}`
+        : verseReference;
 
-        return {
+      return [
+        {
           id: pairing.id,
           title: pairingTitle,
           sourceLine,
@@ -203,20 +203,9 @@ export default async function SavedPage() {
           savedAt: savedItem.created_at
             ? formatSavedAt(savedItem.created_at)
             : undefined,
-        };
-      })
-      .filter(
-        (
-          item,
-        ): item is {
-          id: string;
-          title: string;
-          sourceLine: string;
-          verseText: string;
-          literatureLine?: string;
-          savedAt?: string;
-        } => Boolean(item),
-      );
+        },
+      ];
+    });
   }
 
   return (
