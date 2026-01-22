@@ -4,10 +4,16 @@ import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabaseServer";
 import { AdminRowActions } from "./admin-row-actions";
 
+const DEFAULT_LOCALE = "en";
+
 type AdminPageProps = {
-  searchParams?: {
-    status?: string;
-  };
+  searchParams?:
+    | {
+        status?: string;
+      }
+    | Promise<{
+        status?: string;
+      }>;
 };
 
 type PairingRow = {
@@ -20,6 +26,7 @@ type PairingRow = {
 };
 
 export default async function AdminPage({ searchParams }: AdminPageProps) {
+  const resolvedSearchParams = await Promise.resolve(searchParams);
   const supabase = await createSupabaseServer();
   const {
     data: { user },
@@ -53,8 +60,15 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     );
   }
 
-  const filter = (searchParams?.status ?? "draft").toLowerCase();
+  const filter = (resolvedSearchParams?.status ?? "draft").toLowerCase();
   const today = getSeoulDateString();
+  const warningLocale = DEFAULT_LOCALE;
+  const { exists: hasTodayPairing } = await fetchTodayApprovedPairing(
+    supabase,
+    today,
+    warningLocale,
+  );
+  const showWarning = !hasTodayPairing;
   const { data, error, usesUpdatedAt } = await fetchPairings(
     supabase,
     filter,
@@ -114,6 +128,18 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           Scheduled
         </FilterChip>
       </div>
+
+      {showWarning ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          <span>Today pairing missing</span>
+          <Link
+            href={`/admin/pairings?date=${today}&locale=${warningLocale}&status=all`}
+            className="text-xs font-semibold uppercase tracking-[0.1em] text-amber-700 underline"
+          >
+            Review today
+          </Link>
+        </div>
+      ) : null}
 
       <div className="rounded-2xl border border-neutral-200/80">
         <div className="grid grid-cols-6 gap-3 border-b border-neutral-200/80 bg-neutral-50 px-4 py-3 text-xs font-medium text-neutral-500">
@@ -245,6 +271,29 @@ function buildFilterQuery(
     return query.eq("status", "draft");
   }
   return query;
+}
+
+async function fetchTodayApprovedPairing(
+  supabase: Awaited<ReturnType<typeof createSupabaseServer>>,
+  today: string,
+  locale: string,
+) {
+  const { data, error } = await supabase
+    .from("pairings")
+    .select("id")
+    .eq("status", "approved")
+    .eq("pairing_date", today)
+    .eq("locale", locale)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    console.error("Failed to check today pairing:", error.message);
+    return { exists: false, error: error.message };
+  }
+
+  return { exists: Boolean(data?.length), error: null };
 }
 
 function getSeoulDateString() {

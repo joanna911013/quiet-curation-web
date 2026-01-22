@@ -17,6 +17,23 @@ type PairingDetail = {
   literature_author: string | null;
   literature_work: string | null;
   literature_title: string | null;
+  rationale_short: string | null;
+  verse: VerseRow | null;
+};
+
+type VerseRow = {
+  id: string;
+  translation: string | null;
+  canonical_ref: string | null;
+  verse_text: string | null;
+  text: string | null;
+  book: string | null;
+  chapter: number | null;
+  verse: number | null;
+};
+
+type PairingRow = Omit<PairingDetail, "verse"> & {
+  verse_id: string | null;
 };
 
 const UUID_REGEX =
@@ -48,7 +65,9 @@ export default async function DetailPage({ params }: PageProps) {
 
   const { data: pairing, error: pairingError } = await supabase
     .from("pairings")
-    .select("*")
+    .select(
+      "id, pairing_date, literature_text, literature_source, literature_author, literature_work, literature_title, rationale_short, verse_id",
+    )
     .eq("status", "approved")
     .eq("id", pairingId)
     .maybeSingle();
@@ -79,6 +98,28 @@ export default async function DetailPage({ params }: PageProps) {
     );
   }
 
+  const rawPairing = pairing as PairingRow;
+  let verse: VerseRow | null = null;
+
+  if (rawPairing.verse_id) {
+    const { data: verseRow, error: verseError } = await supabase
+      .from("verses")
+      .select("id, translation, canonical_ref, verse_text, text, book, chapter, verse")
+      .eq("id", rawPairing.verse_id)
+      .maybeSingle();
+
+    if (verseError) {
+      console.error("Failed to load verse for pairing.", verseError);
+    } else {
+      verse = (verseRow as VerseRow) ?? null;
+    }
+  }
+
+  const resolvedPairing = {
+    ...rawPairing,
+    verse,
+  } as PairingDetail;
+
   const { data: savedRow, error: savedError } = await supabase
     .from("saved_items")
     .select("created_at")
@@ -92,7 +133,7 @@ export default async function DetailPage({ params }: PageProps) {
 
   return (
     <DetailView
-      pairing={pairing as PairingDetail}
+      pairing={resolvedPairing}
       initialSaved={Boolean(savedRow)}
       initialSavedAt={savedRow?.created_at ?? null}
     />

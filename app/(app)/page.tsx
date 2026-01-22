@@ -1,202 +1,89 @@
-"use client";
+import Link from "next/link";
+import { headers } from "next/headers";
+import { createSupabaseServer } from "@/lib/supabaseServer";
+import {
+  getTodayPairing,
+  type TodayPairing,
+  type VerseRow,
+} from "@/lib/queries/getTodayPairing";
 
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/button";
-import { ContentCard } from "@/components/content-card";
-import { supabase } from "@/lib/supabaseClient";
+export const dynamic = "force-dynamic";
 
-type PairingSummary = {
-  id: string;
-  pairing_date: string;
-  literature_text: string;
-  literature_source: string | null;
-  literature_author: string | null;
-  literature_work: string | null;
-  literature_title: string | null;
-  rationale_short: string | null;
-  locale: string;
+const CLAMP_2_STYLE = {
+  display: "-webkit-box",
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: "vertical",
+  overflow: "hidden",
+} as const;
+
+const trimText = (text: string) => text.replace(/\s+/g, " ").trim();
+
+const truncateAtWord = (text: string, max: number) => {
+  const cleaned = trimText(text);
+  if (cleaned.length <= max) {
+    return cleaned;
+  }
+  const slice = cleaned.slice(0, max);
+  const lastSpace = slice.lastIndexOf(" ");
+  const trimmed = lastSpace > 0 ? slice.slice(0, lastSpace) : slice;
+  return `${trimmed.trimEnd()}...`;
 };
 
-export default function HomePage() {
-  const router = useRouter();
-  const [pairings, setPairings] = useState<PairingSummary[]>([]);
-  const [savedIds, setSavedIds] = useState<string[]>([]);
-  const [savingIds, setSavingIds] = useState<string[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState("");
+const getVerseText = (verse: VerseRow | null) =>
+  verse?.verse_text?.trim() || verse?.text?.trim() || "";
 
-  useEffect(() => {
-    let isActive = true;
-
-    const fetchPairings = async () => {
-      setIsLoading(true);
-      setErrorMessage("");
-
-      const { data: userData, error: userError } =
-        await supabase.auth.getUser();
-
-      if (!isActive) {
-        return;
-      }
-
-      if (userError || !userData?.user?.id) {
-        setErrorMessage("Please sign in again.");
-        setIsLoading(false);
-        return;
-      }
-
-      const resolvedUserId = userData.user.id;
-      setUserId(resolvedUserId);
-
-      const locale =
-        typeof navigator !== "undefined" &&
-        navigator.language?.toLowerCase().startsWith("ko")
-          ? "ko"
-          : "en";
-
-      const pairingSelect =
-        "id, pairing_date, literature_text, literature_source, literature_author, literature_work, literature_title, rationale_short, locale";
-
-      let { data: pairingData, error: pairingError } = await supabase
-        .from("pairings")
-        .select(pairingSelect)
-        .eq("status", "approved")
-        .eq("locale", locale)
-        .order("pairing_date", { ascending: false })
-        .limit(6);
-
-      if (!pairingError && (pairingData?.length ?? 0) === 0) {
-        const fallback = await supabase
-          .from("pairings")
-          .select(pairingSelect)
-          .eq("status", "approved")
-          .order("pairing_date", { ascending: false })
-          .limit(6);
-
-        pairingData = fallback.data ?? [];
-        pairingError = fallback.error ?? null;
-      }
-
-      if (!isActive) {
-        return;
-      }
-
-      if (pairingError) {
-        setErrorMessage("Unable to load readings.");
-        setIsLoading(false);
-        return;
-      }
-
-      const resolvedPairings = pairingData ?? [];
-      setPairings(resolvedPairings);
-
-      if (resolvedPairings.length > 0) {
-        const { data: savedData, error: savedError } = await supabase
-          .from("saved_items")
-          .select("pairing_id")
-          .eq("user_id", resolvedUserId)
-          .in(
-            "pairing_id",
-            resolvedPairings.map((pairing) => pairing.id),
-          );
-
-        if (!isActive) {
-          return;
-        }
-
-        if (savedError) {
-          console.error("Unable to load saved items.", savedError);
-          setSavedIds([]);
-        } else {
-          setSavedIds(savedData?.map((item) => item.pairing_id) ?? []);
-        }
-      } else {
-        setSavedIds([]);
-      }
-
-      setIsLoading(false);
-    };
-
-    void fetchPairings();
-
-    return () => {
-      isActive = false;
-    };
-  }, []);
-
-  if (isLoading) {
-    return (
-      <main className="mx-auto w-full max-w-xl px-5 pb-10 pt-8">
-        <p className="text-sm text-neutral-500">Loading today...</p>
-      </main>
-    );
+const formatVerseReference = (verse: VerseRow | null) => {
+  if (!verse) {
+    return null;
   }
-
-  if (errorMessage) {
-    return (
-      <main className="mx-auto w-full max-w-xl px-5 pb-10 pt-8">
-        <p className="text-sm text-neutral-500">{errorMessage}</p>
-      </main>
-    );
+  const translation = verse.translation?.trim();
+  if (!translation) {
+    return null;
   }
+  const canonical = verse.canonical_ref?.trim();
+  const fallback =
+    verse.book && verse.chapter != null && verse.verse != null
+      ? `${verse.book} ${verse.chapter}:${verse.verse}`
+      : "";
+  const base = canonical || fallback;
+  if (!base) {
+    return null;
+  }
+  return `${base} (${translation})`;
+};
 
-  const toggleSaved = async (pairingId: string) => {
-    if (!userId) {
-      setErrorMessage("Please sign in again.");
-      return;
-    }
-    if (savingIds.includes(pairingId)) {
-      return;
-    }
+const buildAttributionParts = (pairing: TodayPairing) => {
+  const author = pairing.literature_author?.trim();
+  const title = pairing.literature_title?.trim();
+  if (!author && !title) {
+    return null;
+  }
+  return { author: author || null, title: title || null };
+};
 
-    const nextSaved = !savedIds.includes(pairingId);
+const resolveLocale = async () => {
+  const headerStore = await headers();
+  const acceptLanguage = headerStore.get("accept-language")?.toLowerCase() ?? "";
+  const primary = acceptLanguage.split(",")[0]?.trim() ?? "";
+  if (primary.startsWith("ko")) {
+    return "ko";
+  }
+  return "en";
+};
 
-    setSavedIds((prev) =>
-      nextSaved
-        ? [...prev, pairingId]
-        : prev.filter((item) => item !== pairingId),
-    );
-    setSavingIds((prev) => [...prev, pairingId]);
+export default async function HomePage() {
+  const supabase = await createSupabaseServer();
+  const locale = await resolveLocale();
+  const { pairing, error, isFallback } = await getTodayPairing(supabase, locale);
 
-    if (nextSaved) {
-      const { error } = await supabase.from("saved_items").upsert(
-        {
-          user_id: userId,
-          pairing_id: pairingId,
-        },
-        {
-          onConflict: "user_id,pairing_id",
-          ignoreDuplicates: true,
-        },
-      );
-
-      if (error) {
-        console.error("Unable to save item.", error);
-        setSavedIds((prev) => prev.filter((item) => item !== pairingId));
-        setSavingIds((prev) => prev.filter((item) => item !== pairingId));
-        return;
-      }
-
-      setSavingIds((prev) => prev.filter((item) => item !== pairingId));
-      return;
-    }
-
-    const { error } = await supabase
-      .from("saved_items")
-      .delete()
-      .eq("user_id", userId)
-      .eq("pairing_id", pairingId);
-
-    if (error) {
-      console.error("Unable to remove saved item.", error);
-      setSavedIds((prev) =>
-        prev.includes(pairingId) ? prev : [...prev, pairingId],
-      );
-    }
-    setSavingIds((prev) => prev.filter((item) => item !== pairingId));
-  };
+  const verse = pairing?.verse ?? null;
+  const verseReference = pairing ? formatVerseReference(verse) : null;
+  const verseText = pairing ? getVerseText(verse) : "";
+  const versePreview = verseText;
+  const literaturePreview = pairing?.literature_text
+    ? truncateAtWord(pairing.literature_text, 140)
+    : "";
+  const attribution = pairing ? buildAttributionParts(pairing) : null;
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 pb-8 pt-8">
@@ -210,48 +97,58 @@ export default function HomePage() {
         </p>
       </header>
 
-      <section className="flex flex-col gap-4">
-        {pairings.length === 0 ? (
-          <div className="rounded-2xl border border-neutral-200/80 p-5 text-sm text-neutral-500">
-            No readings yet. Check back soon.
-          </div>
-        ) : (
-          pairings.map((item) => {
-            const previewText = item.rationale_short?.trim()
-              ? item.rationale_short
-              : item.literature_text.split("\n").find(Boolean) ||
-                "A quiet reading for today.";
-            const sourceText =
-              item.literature_source ||
-              item.literature_author ||
-              item.literature_work ||
-              "Quiet Curation";
-            const titleText = item.literature_title || "Daily pairing";
+      {error && !pairing ? (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+          Unable to load today&apos;s pairing.
+        </div>
+      ) : null}
 
-            return (
-            <ContentCard
-              key={item.id}
-              title={titleText}
-              preview={previewText}
-              source={sourceText}
-              saved={savedIds.includes(item.id)}
-              onOpen={() => router.push(`/c/${item.id}`)}
-              onToggleSave={() => toggleSaved(item.id)}
-            />
-            );
-          })
-        )}
-      </section>
+      {pairing && verseReference && versePreview ? (
+        <Link
+          href={`/c/${pairing.id}`}
+          data-fallback={isFallback ? "true" : "false"}
+          className="rounded-2xl border border-neutral-200/80 bg-white p-4 transition hover:border-neutral-300"
+        >
+          <div className="text-xs font-semibold text-neutral-500 truncate">
+            {verseReference}
+          </div>
+          <p className="mt-2 whitespace-pre-line text-[17px] leading-relaxed text-neutral-900">
+            {versePreview}
+          </p>
+          {literaturePreview ? (
+            <p
+              className="mt-3 text-sm text-neutral-600"
+              style={CLAMP_2_STYLE}
+            >
+              {literaturePreview}
+            </p>
+          ) : null}
+          {attribution ? (
+            <p className="mt-2 text-xs text-neutral-500">
+              &mdash;{" "}
+              {attribution.author ? <span>{attribution.author}</span> : null}
+              {attribution.author && attribution.title ? ", " : null}
+              {attribution.title ? (
+                <em className="italic">{attribution.title}</em>
+              ) : null}
+            </p>
+          ) : null}
+        </Link>
+      ) : null}
 
       <div className="mt-2 flex flex-col gap-3">
-        <Button onClick={() => router.push("/emotion")}>Continue</Button>
-        <button
-          type="button"
+        <Link
+          href="/emotion"
+          className="button buttonPrimary inline-flex items-center justify-center"
+        >
+          Continue
+        </Link>
+        <Link
+          href="/profile"
           className="text-xs text-neutral-500 underline"
-          onClick={() => router.push("/profile")}
         >
           Profile
-        </button>
+        </Link>
       </div>
     </main>
   );

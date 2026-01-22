@@ -4,11 +4,17 @@ import { createSupabaseServer } from "@/lib/supabaseServer";
 import { PairingRowActions } from "./row-actions";
 
 type PageProps = {
-  searchParams?: {
-    date?: string;
-    locale?: string;
-    status?: string;
-  };
+  searchParams?:
+    | {
+        date?: string;
+        locale?: string;
+        status?: string;
+      }
+    | Promise<{
+        date?: string;
+        locale?: string;
+        status?: string;
+      }>;
 };
 
 type PairingRow = {
@@ -25,6 +31,7 @@ type PairingRow = {
 export default async function PairingsAdminPage({
   searchParams,
 }: PageProps) {
+  const resolvedSearchParams = await Promise.resolve(searchParams);
   const supabase = await createSupabaseServer();
   const {
     data: { user },
@@ -53,9 +60,9 @@ export default async function PairingsAdminPage({
   }
 
   const today = getSeoulDateString();
-  const dateFilter = searchParams?.date ?? today;
-  const localeFilter = searchParams?.locale ?? "en";
-  const statusFilter = normalizeStatus(searchParams?.status);
+  const dateFilter = resolvedSearchParams?.date ?? today;
+  const localeFilter = resolvedSearchParams?.locale ?? "en";
+  const statusFilter = normalizeStatus(resolvedSearchParams?.status);
 
   const { data, error, usesUpdatedAt } = await fetchPairings(
     supabase,

@@ -46,17 +46,23 @@ export async function GET(request: Request) {
     auth: { persistSession: false },
   });
 
-  // Approved-only gate for today's pairing; fallback uses env var if none found.
+  // Approved-only gate for today's pairing; fallback uses safe set before env fallback.
   const pairingId = await fetchTodayPairingId(
     supabase,
     deliveryDate,
     DEFAULT_LOCALE,
   );
-  const curationId = pairingId || fallbackCurationId || "";
+  const safePairingId = pairingId
+    ? null
+    : await fetchSafeSetPairingId(supabase, DEFAULT_LOCALE);
+  const curationId = pairingId || safePairingId || fallbackCurationId || "";
 
   if (!curationId) {
     return NextResponse.json(
-      { error: "No pairing for today and FALLBACK_CURATION_ID is not set." },
+      {
+        error:
+          "No pairing for today and no safe set pairing found (FALLBACK_CURATION_ID is not set).",
+      },
       { status: 500 },
     );
   }
@@ -233,6 +239,28 @@ async function fetchTodayPairingId(
   }
 
   return data?.id ?? null;
+}
+
+async function fetchSafeSetPairingId(
+  client: SupabaseClient,
+  locale: string,
+) {
+  const { data, error } = await client
+    .from("pairings")
+    .select("id")
+    .eq("status", "approved")
+    .eq("locale", locale)
+    .eq("is_safe_set", true)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    console.error("Failed to load safe set pairing:", error.message);
+    return null;
+  }
+
+  return data?.[0]?.id ?? null;
 }
 
 function getSeoulDateString() {

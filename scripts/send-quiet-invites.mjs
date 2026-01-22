@@ -41,11 +41,14 @@ const pairingId = await fetchTodayPairingId(
   deliveryDate,
   options.locale,
 );
-const curationId = pairingId || fallbackCurationId || "";
+const safePairingId = pairingId
+  ? null
+  : await fetchSafeSetPairingId(supabase, options.locale);
+const curationId = pairingId || safePairingId || fallbackCurationId || "";
 
 if (!curationId) {
   console.error(
-    "No pairing found for today and FALLBACK_CURATION_ID is not set.",
+    "No pairing found for today and no safe set pairing found (FALLBACK_CURATION_ID is not set).",
   );
   process.exit(1);
 }
@@ -129,6 +132,25 @@ async function fetchTodayPairingId(client, date, locale) {
   }
 
   return data?.id ?? null;
+}
+
+async function fetchSafeSetPairingId(client, locale) {
+  const { data, error } = await client
+    .from("pairings")
+    .select("id")
+    .eq("status", "approved")
+    .eq("locale", locale)
+    .eq("is_safe_set", true)
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    console.error("Failed to load safe set pairing:", error.message);
+    return null;
+  }
+
+  return data?.[0]?.id ?? null;
 }
 
 function getSeoulDateString() {
