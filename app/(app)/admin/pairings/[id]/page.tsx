@@ -3,12 +3,24 @@ import { createSupabaseServer } from "@/lib/supabaseServer";
 import { PairingEditor } from "../editor";
 
 type PageProps = {
-  params: {
-    id: string;
-  };
+  params: { id: string } | Promise<{ id: string }>;
 };
 
 export default async function PairingDetailPage({ params }: PageProps) {
+  const resolvedParams = await Promise.resolve(params);
+  const pairingId = resolvedParams.id;
+
+  if (!pairingId) {
+    return (
+      <main className="mx-auto w-full max-w-xl px-5 pb-16 pt-8">
+        <h1 className="text-2xl font-semibold">Pairing not found</h1>
+        <p className="mt-2 text-sm text-neutral-500">
+          Check the pairing ID and try again.
+        </p>
+      </main>
+    );
+  }
+
   const supabase = await createSupabaseServer();
   const {
     data: { user },
@@ -41,7 +53,7 @@ export default async function PairingDetailPage({ params }: PageProps) {
     .select(
       "id, pairing_date, locale, status, verse_id, literature_author, literature_title, literature_source, literature_text, rationale_short, updated_at, created_at",
     )
-    .eq("id", params.id)
+    .eq("id", pairingId)
     .maybeSingle();
 
   if (error || !pairing) {
