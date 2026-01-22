@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   approvePairing,
@@ -39,6 +40,9 @@ export function PairingEditor({ initial, today }: PairingEditorProps) {
   const [saveErrors, setSaveErrors] = useState<string[]>(EMPTY_ERRORS);
   const [approveErrors, setApproveErrors] = useState<string[]>(EMPTY_ERRORS);
   const [infoMessage, setInfoMessage] = useState("");
+  const [existingPairingId, setExistingPairingId] = useState<string | null>(
+    null,
+  );
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(
     initial.updated_at ?? initial.created_at ?? null,
   );
@@ -60,13 +64,18 @@ export function PairingEditor({ initial, today }: PairingEditorProps) {
   const handleSave = () => {
     setSaveErrors(EMPTY_ERRORS);
     setInfoMessage("");
+    setExistingPairingId(null);
     startTransition(async () => {
       const result = await savePairing(form);
       if (!result.ok) {
         setSaveErrors(result.errors ?? [result.error]);
+        if (result.existingPairingId) {
+          setExistingPairingId(result.existingPairingId);
+        }
         return;
       }
       setLastSavedAt(result.lastSavedAt);
+      setExistingPairingId(null);
       if (result.status) {
         setForm((prev) => ({ ...prev, status: result.status }));
       }
@@ -198,6 +207,18 @@ export function PairingEditor({ initial, today }: PairingEditorProps) {
               <li key={error}>{error}</li>
             ))}
           </ul>
+          {existingPairingId ? (
+            <p className="mt-2 text-xs text-rose-600">
+              Existing pairing found for this date/locale.{" "}
+              <Link
+                className="underline"
+                href={`/admin/pairings/${existingPairingId}`}
+              >
+                Open it
+              </Link>
+              .
+            </p>
+          ) : null}
         </div>
       ) : null}
 

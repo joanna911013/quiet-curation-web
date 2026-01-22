@@ -18,7 +18,12 @@ export type PairingFormInput = {
 
 export type ActionResult =
   | { ok: true; pairingId: string; status?: string; lastSavedAt: string }
-  | { ok: false; error: string; errors?: string[] };
+  | {
+      ok: false;
+      error: string;
+      errors?: string[];
+      existingPairingId?: string;
+    };
 
 type AdminContext =
   | { ok: true; supabase: Awaited<ReturnType<typeof createSupabaseServer>>; userId: string }
@@ -100,6 +105,21 @@ export async function savePairing(
   const nowIso = new Date().toISOString();
 
   if (!input.id) {
+    const existing = await findExistingPairing(
+      admin.supabase,
+      pairingDate,
+      locale,
+    );
+
+    if (existing?.id) {
+      return {
+        ok: false,
+        error: "Pairing already exists for this date and locale.",
+        errors: ["Pairing already exists for this date and locale."],
+        existingPairingId: existing.id,
+      };
+    }
+
     const { data, error } = await admin.supabase
       .from("pairings")
       .insert(payload)
@@ -107,7 +127,23 @@ export async function savePairing(
       .single();
 
     if (error || !data) {
-      return { ok: false, error: error?.message ?? "Failed to create pairing." };
+      if (error?.code === "23505") {
+        const duplicate = await findExistingPairing(
+          admin.supabase,
+          pairingDate,
+          locale,
+        );
+        return {
+          ok: false,
+          error: "Pairing already exists for this date and locale.",
+          errors: ["Pairing already exists for this date and locale."],
+          existingPairingId: duplicate?.id,
+        };
+      }
+      return {
+        ok: false,
+        error: error?.message ?? "Failed to create pairing.",
+      };
     }
 
     revalidatePath("/admin");
@@ -320,6 +356,26 @@ function normalizeOptional(value?: string | null, fallback: string | null = null
     return fallback;
   }
   return trimmed;
+}
+
+async function findExistingPairing(
+  supabase: Awaited<ReturnType<typeof createSupabaseServer>>,
+  pairingDate: string,
+  locale: string,
+) {
+  const { data, error } = await supabase
+    .from("pairings")
+    .select("id")
+    .eq("pairing_date", pairingDate)
+    .eq("locale", locale)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed to check existing pairing:", error.message);
+    return null;
+  }
+
+  return data;
 }
 
 function countWords(value: string) {
