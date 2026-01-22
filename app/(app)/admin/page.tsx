@@ -1,19 +1,36 @@
-export default function AdminPage() {
-  const isLoading = false;
-  const errorMessage = "";
+import { redirect } from "next/navigation";
+import { createSupabaseServer } from "@/lib/supabaseServer";
 
-  if (isLoading) {
-    return (
-      <main className="mx-auto w-full max-w-xl px-5 pb-16 pt-8">
-        <p className="text-sm text-neutral-500">Loading admin...</p>
-      </main>
-    );
+export default async function AdminPage() {
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    redirect("/login?redirect=/admin");
   }
 
-  if (errorMessage) {
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profileError) {
+    console.error("Failed to load profile role:", profileError.message);
+  }
+
+  const isAdmin = profile?.role === "admin";
+
+  if (!isAdmin) {
     return (
       <main className="mx-auto w-full max-w-xl px-5 pb-16 pt-8">
-        <p className="text-sm text-neutral-500">{errorMessage}</p>
+        <h1 className="text-2xl font-semibold">Not authorized</h1>
+        <p className="mt-2 text-sm text-neutral-500">
+          You do not have access to this page.
+        </p>
       </main>
     );
   }

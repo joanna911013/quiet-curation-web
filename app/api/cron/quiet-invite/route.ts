@@ -46,6 +46,7 @@ export async function GET(request: Request) {
     auth: { persistSession: false },
   });
 
+  // Approved-only gate for today's pairing; fallback uses env var if none found.
   const pairingId = await fetchTodayPairingId(
     supabase,
     deliveryDate,
@@ -222,6 +223,8 @@ async function fetchTodayPairingId(
     .eq("pairing_date", date)
     .eq("locale", locale)
     .eq("status", "approved")
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
     .maybeSingle();
 
   if (error) {
