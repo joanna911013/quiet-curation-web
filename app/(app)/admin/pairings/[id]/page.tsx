@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
 import { createSupabaseServer } from "@/lib/supabaseServer";
 import { PairingEditor } from "../editor";
 
@@ -56,7 +57,10 @@ export default async function PairingDetailPage({ params }: PageProps) {
     .eq("id", pairingId)
     .maybeSingle();
 
-  if (error || !pairing) {
+  const resolvedPairing =
+    pairing ?? (await fetchPairingWithServiceRole(pairingId));
+
+  if (error || !resolvedPairing) {
     return (
       <main className="mx-auto w-full max-w-xl px-5 pb-16 pt-8">
         <h1 className="text-2xl font-semibold">Pairing not found</h1>
@@ -69,7 +73,7 @@ export default async function PairingDetailPage({ params }: PageProps) {
 
   return (
     <main className="mx-auto w-full max-w-4xl px-5 pb-16 pt-8">
-      <PairingEditor initial={pairing} today={getSeoulDateString()} />
+      <PairingEditor initial={resolvedPairing} today={getSeoulDateString()} />
     </main>
   );
 }
@@ -82,4 +86,33 @@ function getSeoulDateString() {
     day: "2-digit",
   });
   return formatter.format(new Date());
+}
+
+async function fetchPairingWithServiceRole(pairingId: string) {
+  const supabaseUrl =
+    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceKey) {
+    return null;
+  }
+
+  const service = createClient(supabaseUrl, serviceKey, {
+    auth: { persistSession: false },
+  });
+
+  const { data, error } = await service
+    .from("pairings")
+    .select(
+      "id, pairing_date, locale, status, verse_id, literature_author, literature_title, literature_source, literature_text, rationale_short, updated_at, created_at",
+    )
+    .eq("id", pairingId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Admin service fetch failed:", error.message);
+    return null;
+  }
+
+  return data;
 }
