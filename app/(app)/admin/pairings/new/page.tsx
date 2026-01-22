@@ -42,6 +42,7 @@ export default async function NewPairingPage() {
           locale: "en",
           status: "draft",
           verse_id: "",
+          curation_id: "",
           literature_author: "",
           literature_title: "",
           literature_source: "",

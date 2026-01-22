@@ -9,6 +9,7 @@ export type PairingFormInput = {
   locale: string;
   status?: string | null;
   verse_id: string;
+  curation_id?: string | null;
   literature_author?: string | null;
   literature_title?: string | null;
   literature_source?: string | null;
@@ -30,6 +31,7 @@ type AdminContext =
   | { ok: false; error: string };
 
 const MAX_EXCERPT_WORDS = 70;
+const RATIONALE_MAX_CHARS = 240;
 
 async function requireAdmin(): Promise<AdminContext> {
   const supabase = await createSupabaseServer();
@@ -76,12 +78,6 @@ export async function savePairing(
   if (!locale) {
     errors.push("Locale is required.");
   }
-  if (!verseId) {
-    errors.push("Verse ID is required.");
-  }
-  if (!literatureText) {
-    errors.push("Literature excerpt is required.");
-  }
 
   if (errors.length) {
     return { ok: false, error: "validation_failed", errors };
@@ -90,11 +86,12 @@ export async function savePairing(
   const payload = {
     pairing_date: pairingDate,
     locale,
-    verse_id: verseId,
+    verse_id: verseId || null,
+    curation_id: normalizeOptional(input.curation_id),
     literature_author: normalizeOptional(input.literature_author),
     literature_title: normalizeOptional(input.literature_title),
     literature_source: normalizeOptional(input.literature_source),
-    literature_text: literatureText,
+    literature_text: literatureText || null,
     rationale_short: normalizeOptional(input.rationale_short, ""),
   };
 
@@ -147,6 +144,7 @@ export async function savePairing(
     }
 
     revalidatePath("/admin");
+    revalidatePath("/admin/pairings");
     return { ok: true, pairingId: data.id, status: data.status, lastSavedAt: nowIso };
   }
 
@@ -162,6 +160,7 @@ export async function savePairing(
   }
 
   revalidatePath("/admin");
+  revalidatePath("/admin/pairings");
   revalidatePath(`/admin/pairings/${input.id}`);
   return { ok: true, pairingId: data.id, status: data.status, lastSavedAt: nowIso };
 }
@@ -175,7 +174,7 @@ export async function approvePairing(pairingId: string): Promise<ActionResult> {
   const { data: pairing, error: pairingError } = await admin.supabase
     .from("pairings")
     .select(
-      "id, verse_id, literature_author, literature_title, literature_source, literature_text",
+      "id, pairing_date, locale, verse_id, literature_author, literature_title, literature_source, literature_text, rationale_short",
     )
     .eq("id", pairingId)
     .maybeSingle();
@@ -189,6 +188,28 @@ export async function approvePairing(pairingId: string): Promise<ActionResult> {
     return { ok: false, error: "validation_failed", errors };
   }
 
+  // Option A: block approval if another approved pairing exists for the same date+locale.
+  const { data: existing, error: existingError } = await admin.supabase
+    .from("pairings")
+    .select("id")
+    .eq("pairing_date", pairing.pairing_date)
+    .eq("locale", pairing.locale)
+    .eq("status", "approved")
+    .neq("id", pairingId)
+    .maybeSingle();
+
+  if (existingError) {
+    return { ok: false, error: existingError.message };
+  }
+
+  if (existing) {
+    return {
+      ok: false,
+      error: "Already approved for this date and locale.",
+      errors: ["Already approved for this date and locale."],
+    };
+  }
+
   const { error } = await admin.supabase
     .from("pairings")
     .update({ status: "approved" })
@@ -200,6 +221,7 @@ export async function approvePairing(pairingId: string): Promise<ActionResult> {
 
   const nowIso = new Date().toISOString();
   revalidatePath("/admin");
+  revalidatePath("/admin/pairings");
   revalidatePath(`/admin/pairings/${pairingId}`);
   return { ok: true, pairingId, status: "approved", lastSavedAt: nowIso };
 }
@@ -223,6 +245,7 @@ export async function unapprovePairing(
 
   const nowIso = new Date().toISOString();
   revalidatePath("/admin");
+  revalidatePath("/admin/pairings");
   revalidatePath(`/admin/pairings/${pairingId}`);
   return { ok: true, pairingId, status: "draft", lastSavedAt: nowIso };
 }
@@ -279,6 +302,7 @@ export async function setTodayPairing(
 
   const nowIso = new Date().toISOString();
   revalidatePath("/admin");
+  revalidatePath("/admin/pairings");
   revalidatePath(`/admin/pairings/${pairingId}`);
   return { ok: true, pairingId, status: "approved", lastSavedAt: nowIso };
 }
@@ -286,14 +310,24 @@ export async function setTodayPairing(
 async function validatePairing(
   supabase: Awaited<ReturnType<typeof createSupabaseServer>>,
   pairing: {
+    pairing_date: string | null;
+    locale: string | null;
     verse_id: string | null;
     literature_author: string | null;
     literature_title: string | null;
     literature_source: string | null;
     literature_text: string | null;
+    rationale_short: string | null;
   },
 ) {
   const errors: string[] = [];
+
+  if (!pairing.pairing_date) {
+    errors.push("Pairing date is required.");
+  }
+  if (!pairing.locale) {
+    errors.push("Locale is required.");
+  }
 
   if (!pairing.verse_id) {
     errors.push("Verse is required.");
@@ -345,6 +379,13 @@ async function validatePairing(
     if (wordCount > MAX_EXCERPT_WORDS) {
       errors.push(`Literature excerpt exceeds ${MAX_EXCERPT_WORDS} words.`);
     }
+  }
+
+  const rationale = pairing.rationale_short?.trim() ?? "";
+  if (!rationale) {
+    errors.push("Rationale is required.");
+  } else if (rationale.length > RATIONALE_MAX_CHARS) {
+    errors.push(`Rationale exceeds ${RATIONALE_MAX_CHARS} characters.`);
   }
 
   return errors;

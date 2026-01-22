@@ -52,7 +52,7 @@ export default async function PairingDetailPage({ params }: PageProps) {
   const { data: pairing, error } = await supabase
     .from("pairings")
     .select(
-      "id, pairing_date, locale, status, verse_id, literature_author, literature_title, literature_source, literature_text, rationale_short, created_at",
+      "id, pairing_date, locale, status, verse_id, curation_id, literature_author, literature_title, literature_source, literature_text, rationale_short, created_at",
     )
     .eq("id", pairingId)
     .maybeSingle();
@@ -104,7 +104,7 @@ async function fetchPairingWithServiceRole(pairingId: string) {
   const { data, error } = await service
     .from("pairings")
     .select(
-      "id, pairing_date, locale, status, verse_id, literature_author, literature_title, literature_source, literature_text, rationale_short, created_at",
+      "id, pairing_date, locale, status, verse_id, curation_id, literature_author, literature_title, literature_source, literature_text, rationale_short, created_at",
     )
     .eq("id", pairingId)
     .maybeSingle();

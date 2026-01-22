@@ -31,6 +31,7 @@ export function PairingEditor({ initial, today }: PairingEditorProps) {
     locale: initial.locale ?? "en",
     status: initial.status ?? "draft",
     verse_id: initial.verse_id ?? "",
+    curation_id: initial.curation_id ?? "",
     literature_author: initial.literature_author ?? "",
     literature_title: initial.literature_title ?? "",
     literature_source: initial.literature_source ?? "",
@@ -272,6 +273,15 @@ export function PairingEditor({ initial, today }: PairingEditorProps) {
             type="text"
             value={form.verse_id}
             onChange={(event) => updateField("verse_id", event.target.value)}
+            className="rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-900"
+          />
+        </label>
+        <label className="flex flex-col gap-2 text-sm text-neutral-600">
+          Curation ID (optional)
+          <input
+            type="text"
+            value={form.curation_id ?? ""}
+            onChange={(event) => updateField("curation_id", event.target.value)}
             className="rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-900"
           />
         </label>

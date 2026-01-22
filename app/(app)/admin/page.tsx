@@ -84,12 +84,20 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             Manage daily pairings and approvals.
           </p>
         </div>
-        <Link
-          className="rounded-full border border-neutral-200 px-4 py-2 text-sm text-neutral-700"
-          href="/admin/pairings/new"
-        >
-          New pairing
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            className="rounded-full border border-neutral-200 px-4 py-2 text-sm text-neutral-700"
+            href="/admin/pairings"
+          >
+            Pairings dashboard
+          </Link>
+          <Link
+            className="rounded-full border border-neutral-200 px-4 py-2 text-sm text-neutral-700"
+            href="/admin/pairings/new"
+          >
+            New pairing
+          </Link>
+        </div>
       </header>
 
       <div className="flex flex-wrap gap-2 text-xs text-neutral-500">
