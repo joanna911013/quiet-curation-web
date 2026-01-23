@@ -5,7 +5,6 @@ export type VerseRow = {
   translation: string | null;
   canonical_ref: string | null;
   verse_text: string | null;
-  text: string | null;
   book: string | null;
   chapter: number | null;
   verse: number | null;
@@ -16,6 +15,7 @@ export type TodayPairing = {
   pairing_date: string | null;
   locale: string | null;
   status: string | null;
+  curation_id: string | null;
   literature_text: string | null;
   literature_source: string | null;
   literature_author: string | null;
@@ -35,7 +35,7 @@ type PairingQueryResult = {
 };
 
 const PAIRING_SELECT =
-  "id, pairing_date, locale, status, literature_text, literature_source, literature_author, literature_title, literature_work, rationale_short, verse_id, created_at";
+  "id, pairing_date, locale, status, curation_id, literature_text, literature_source, literature_author, literature_title, literature_work, rationale_short, verse_id, created_at";
 
 export async function getTodayPairing(
   supabase: Awaited<ReturnType<typeof createSupabaseServer>>,
@@ -133,7 +133,7 @@ async function hydratePairing(
   if (raw.verse_id) {
     const { data: verseRow, error: verseError } = await supabase
       .from("verses")
-      .select("id, translation, canonical_ref, verse_text, text, book, chapter, verse")
+      .select("id, translation, canonical_ref, verse_text, book, chapter, verse")
       .eq("id", raw.verse_id)
       .maybeSingle();
 

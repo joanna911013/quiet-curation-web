@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { renderQuietInviteEmail } from "@/lib/emails/renderQuietInviteEmail";
 import { sendInviteEmail } from "@/lib/emails/sendInviteEmail";
+import { logInfo, logWarn, maskEmail, truncateText } from "@/lib/observability";
+import { resolveVerseText } from "@/lib/verses";
 
 export const runtime = "nodejs";
 
@@ -10,6 +13,8 @@ const DEFAULT_CHANNEL = "email";
 const MAX_RETRIES = 3;
 
 export async function GET(request: Request) {
+  const runId = randomUUID();
+  const requestId = runId;
   const cronSecret = process.env.CRON_SECRET;
   const authHeader = request.headers.get("authorization");
 
@@ -93,6 +98,18 @@ export async function GET(request: Request) {
     retried: 0,
   };
 
+  logInfo("quiet_invite.run_started", {
+    request_id: requestId,
+    run_id: runId,
+    route: "cron/quiet-invite",
+    delivery_date: deliveryDate,
+    locale: DEFAULT_LOCALE,
+    recipients_count: recipients?.length ?? 0,
+    chosen_curation_id: curationId,
+    pairing_id: pairingId ?? safePairingId ?? null,
+    fallback_used: !pairingId,
+  });
+
   const recipientById = new Map(
     (recipients ?? []).map((recipient) => [recipient.id, recipient]),
   );
@@ -123,6 +140,21 @@ export async function GET(request: Request) {
         summary.skipped += 1;
         continue;
       }
+      logWarn("quiet_invite.recipient_failed", {
+        request_id: requestId,
+        run_id: runId,
+        route: "cron/quiet-invite",
+        delivery_date: deliveryDate,
+        locale: DEFAULT_LOCALE,
+        user_id: recipient.id,
+        invite_delivery_id: null,
+        to_email: maskEmail(recipientEmail),
+        provider: emailProvider,
+        curation_id: curationId,
+        pairing_id: pairingId ?? safePairingId ?? null,
+        retry_count: 0,
+        error_message: truncateText(error.message ?? "insert_failed", 200),
+      });
       summary.failed += 1;
       await markInviteFailed(supabase, {
         inviteId: null,
@@ -135,16 +167,47 @@ export async function GET(request: Request) {
 
     summary.inserted += 1;
     await markInviteAttempt(supabase, data.id);
+    const sendStart = Date.now();
     const sendResult = await sendInviteEmail({
       recipient: { id: data.user_id, email: recipientEmail },
       ...inviteContent,
       siteUrl: normalizedSiteUrl,
     });
+    const latencyMs = Date.now() - sendStart;
 
     if (sendResult.ok) {
+      logInfo("quiet_invite.recipient_sent", {
+        request_id: requestId,
+        run_id: runId,
+        route: "cron/quiet-invite",
+        delivery_date: deliveryDate,
+        locale: DEFAULT_LOCALE,
+        user_id: data.user_id,
+        invite_delivery_id: data.id,
+        to_email: maskEmail(recipientEmail),
+        provider: emailProvider,
+        curation_id: curationId,
+        pairing_id: pairingId ?? safePairingId ?? null,
+        latency_ms: latencyMs,
+      });
       summary.sent += 1;
       await markInviteSent(supabase, data.id);
     } else {
+      logWarn("quiet_invite.recipient_failed", {
+        request_id: requestId,
+        run_id: runId,
+        route: "cron/quiet-invite",
+        delivery_date: deliveryDate,
+        locale: DEFAULT_LOCALE,
+        user_id: data.user_id,
+        invite_delivery_id: data.id,
+        to_email: maskEmail(recipientEmail),
+        provider: emailProvider,
+        curation_id: curationId,
+        pairing_id: pairingId ?? safePairingId ?? null,
+        retry_count: data.retry_count ?? 0,
+        error_message: truncateText(sendResult.error ?? "send_failed", 200),
+      });
       summary.failed += 1;
       await markInviteFailed(supabase, {
         inviteId: data.id,
@@ -157,8 +220,17 @@ export async function GET(request: Request) {
   }
 
   if (!recipientIds.length) {
+    logInfo("quiet_invite.run_finished", {
+      request_id: requestId,
+      run_id: runId,
+      route: "cron/quiet-invite",
+      locale: DEFAULT_LOCALE,
+      ...summary,
+    });
     return NextResponse.json({
       ok: true,
+      run_id: runId,
+      request_id: requestId,
       summary,
       ...(cronDebug && { emailProvider, isDryRun }),
     });
@@ -190,16 +262,47 @@ export async function GET(request: Request) {
 
     summary.retried += 1;
     await markInviteAttempt(supabase, row.id);
+    const retryStart = Date.now();
     const retryResult = await sendInviteEmail({
       recipient: { id: row.user_id, email: retryEmail },
       ...inviteContent,
       siteUrl: normalizedSiteUrl,
     });
+    const retryLatencyMs = Date.now() - retryStart;
 
     if (retryResult.ok) {
+      logInfo("quiet_invite.recipient_sent", {
+        request_id: requestId,
+        run_id: runId,
+        route: "cron/quiet-invite",
+        delivery_date: deliveryDate,
+        locale: DEFAULT_LOCALE,
+        user_id: row.user_id,
+        invite_delivery_id: row.id,
+        to_email: maskEmail(retryEmail),
+        provider: emailProvider,
+        curation_id: curationId,
+        pairing_id: pairingId ?? safePairingId ?? null,
+        latency_ms: retryLatencyMs,
+      });
       summary.sent += 1;
       await markInviteSent(supabase, row.id);
     } else {
+      logWarn("quiet_invite.recipient_failed", {
+        request_id: requestId,
+        run_id: runId,
+        route: "cron/quiet-invite",
+        delivery_date: deliveryDate,
+        locale: DEFAULT_LOCALE,
+        user_id: row.user_id,
+        invite_delivery_id: row.id,
+        to_email: maskEmail(retryEmail),
+        provider: emailProvider,
+        curation_id: curationId,
+        pairing_id: pairingId ?? safePairingId ?? null,
+        retry_count: row.retry_count ?? 0,
+        error_message: truncateText(retryResult.error ?? "send_failed", 200),
+      });
       summary.failed += 1;
       await markInviteFailed(supabase, {
         inviteId: row.id,
@@ -211,8 +314,18 @@ export async function GET(request: Request) {
     }
   }
 
+  logInfo("quiet_invite.run_finished", {
+    request_id: requestId,
+    run_id: runId,
+    route: "cron/quiet-invite",
+    locale: DEFAULT_LOCALE,
+    ...summary,
+  });
+
   return NextResponse.json({
     ok: true,
+    run_id: runId,
+    request_id: requestId,
     summary,
     ...(cronDebug && { emailProvider, isDryRun }),
   });
@@ -332,7 +445,7 @@ async function fetchInviteContent(
     } else if (verseRow) {
       pairing.canonical_ref =
         verseRow.canonical_ref ?? formatVerseReference(verseRow);
-      pairing.verse_text = verseRow.verse_text;
+      pairing.verse_text = resolveVerseText(verseRow.verse_text);
       pairing.translation = verseRow.translation;
     }
   }

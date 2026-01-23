@@ -4,7 +4,7 @@ drop function if exists public.search_verses(vector, text, int, float);
 -- Full-text search index for verse_text.
 create index if not exists verses_verse_text_fts_idx
   on public.verses
-  using gin (to_tsvector('english', coalesce(verse_text, "text", '')));
+  using gin (to_tsvector('english', coalesce(verse_text, '')));
 
 create or replace function public.search_verses(
   query_text text,
@@ -25,15 +25,15 @@ as $$
     select
       v.id,
       coalesce(v.canonical_ref, v.book || ' ' || v.chapter || ':' || v.verse) as canonical_ref,
-      coalesce(v.verse_text, v."text", '') as body,
-      to_tsvector('english', coalesce(v.verse_text, v."text", '')) as document,
+      coalesce(v.verse_text, '') as body,
+      to_tsvector('english', coalesce(v.verse_text, '')) as document,
       plainto_tsquery('english', btrim(search_verses.query_text)) as query
     from verses v
     where search_verses.query_text is not null
       and btrim(search_verses.query_text) <> ''
       and v.locale = search_verses.locale
       and v.translation = search_verses.translation
-      and coalesce(v.verse_text, v."text", '') <> ''
+      and coalesce(v.verse_text, '') <> ''
   )
   select
     base.id as verse_id,

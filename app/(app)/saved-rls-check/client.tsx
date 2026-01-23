@@ -6,10 +6,10 @@ import { listSaved, normalSave, spoofSave, normalUnsave, spoofUnsave } from "./a
 export default function SavedRlsClient({ loggedInUserId }: { loggedInUserId: string }) {
   const [pairingId, setPairingId] = useState("");
   const [spoofUserId, setSpoofUserId] = useState("");
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<unknown>(null);
   const [isPending, startTransition] = useTransition();
 
-  const run = (fn: () => Promise<any>) => {
+  const run = (fn: () => Promise<unknown>) => {
     startTransition(async () => {
       setResult({ running: true });
       const res = await fn();

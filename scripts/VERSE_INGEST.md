@@ -26,10 +26,12 @@ JSON or CSV with columns:
 - `verse` (int)
 - `canonical_ref` (string, must be "{book} {chapter}:{verse}")
 - `verse_text` (string)
+- `text` (string, optional legacy field; used if `verse_text` is missing)
 
 Notes:
 - Text fields are trimmed and internal whitespace is collapsed to single spaces.
-- `verse_text` is stored in both `verse_text` and legacy `text`.
+- If `verse_text` is missing, the `text` field is used as the fallback.
+- The resolved verse text is stored in `verse_text`.
 
 ## Run
 
@@ -40,6 +42,7 @@ node scripts/ingest-verses.mjs --input ./path/to/verses.json
 Optional flags:
 - `--batch-size 100`
 - `--dry-run`
+- `--update-existing` (upsert and overwrite existing rows)
 
 ## Output
 

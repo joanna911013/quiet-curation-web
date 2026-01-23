@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SaveButton } from "./save-button";
+import { resolveVerseText } from "@/lib/verses";
 
 type PairingDetail = {
   id: string;
@@ -21,7 +22,6 @@ type VerseRow = {
   translation: string | null;
   canonical_ref: string | null;
   verse_text: string | null;
-  text: string | null;
   book: string | null;
   chapter: number | null;
   verse: number | null;
@@ -43,7 +43,7 @@ const CLAMP_4_STYLE = {
 const trimText = (text: string) => text.replace(/\s+/g, " ").trim();
 
 const getVerseText = (verse: VerseRow | null) =>
-  verse?.verse_text?.trim() || verse?.text?.trim() || "";
+  resolveVerseText(verse?.verse_text);
 
 const formatVerseReference = (verse: VerseRow | null) => {
   if (!verse) {

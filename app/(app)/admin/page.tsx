@@ -235,9 +235,11 @@ async function fetchPairings(
     today,
   );
 
-  let { data, error } = await base
+  const initialResult = await base
     .order("updated_at", { ascending: false })
     .order("id", { ascending: false });
+  let data = initialResult.data as PairingRow[] | null;
+  let error = initialResult.error;
 
   if (error?.message?.includes("updated_at")) {
     const fallback = buildFilterQuery(
@@ -247,31 +249,35 @@ async function fetchPairings(
       filter,
       today,
     );
-    ({ data, error } = await fallback
+    const fallbackResult = await fallback
       .order("created_at", { ascending: false })
-      .order("id", { ascending: false }));
+      .order("id", { ascending: false });
+    data = fallbackResult.data as PairingRow[] | null;
+    error = fallbackResult.error;
     return { data: data as PairingRow[] | null, error: error?.message, usesUpdatedAt: false };
   }
 
   return { data: data as PairingRow[] | null, error: error?.message, usesUpdatedAt: true };
 }
 
-function buildFilterQuery(
-  query: any,
-  filter: string,
-  today: string,
-) {
+function buildFilterQuery<T>(query: T, filter: string, today: string): T {
+  const builder = query as unknown as FilterableQuery;
   if (filter === "approved") {
-    return query.eq("status", "approved");
+    return builder.eq("status", "approved") as unknown as T;
   }
   if (filter === "scheduled") {
-    return query.eq("status", "approved").gt("pairing_date", today);
+    return builder.eq("status", "approved").gt("pairing_date", today) as unknown as T;
   }
   if (filter === "draft") {
-    return query.eq("status", "draft");
+    return builder.eq("status", "draft") as unknown as T;
   }
   return query;
 }
+
+type FilterableQuery = {
+  eq: (column: string, value: string) => FilterableQuery;
+  gt: (column: string, value: string) => FilterableQuery;
+};
 
 async function fetchTodayApprovedPairing(
   supabase: Awaited<ReturnType<typeof createSupabaseServer>>,

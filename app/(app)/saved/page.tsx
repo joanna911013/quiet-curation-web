@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { SavedListItem } from "@/components/saved-list-item";
 import { RetryButton } from "@/components/retry-button";
 import { createSupabaseServer } from "@/lib/supabaseServer";
+import { resolveVerseText } from "@/lib/verses";
 
 export const dynamic = "force-dynamic";
 
@@ -32,7 +33,6 @@ type VerseRow = {
   translation: string | null;
   canonical_ref: string | null;
   verse_text: string;
-  text: string;
 };
 
 const trimText = (text: string) => text.replace(/\s+/g, " ").trim();
@@ -148,7 +148,7 @@ export default async function SavedPage() {
       const { data: verseRows, error: verseError } = await supabase
         .from("verses")
         .select(
-          "id, book, chapter, verse, translation, canonical_ref, verse_text, text",
+          "id, book, chapter, verse, translation, canonical_ref, verse_text",
         )
         .in("id", verseIds);
 
@@ -175,11 +175,8 @@ export default async function SavedPage() {
       }
       const verse = versesById.get(pairing.verse_id);
       const verseReference = formatVerseReference(verse);
-      const resolvedVerseText =
-        verse?.verse_text?.trim() || verse?.text?.trim() || "";
-      const verseText = resolvedVerseText
-        ? truncateText(resolvedVerseText, 160)
-        : "Verse text unavailable.";
+      const resolvedVerseText = resolveVerseText(verse?.verse_text);
+      const verseText = resolvedVerseText || "Verse text unavailable.";
       const literatureLine = buildLiteratureLine(pairing);
       const pairingTitle =
         pairing.literature_title ||

@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { randomUUID } from "crypto";
 import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabaseServer";
 import { DetailView } from "./detail-view";
+import { logWarn } from "@/lib/observability";
 
 export const dynamic = "force-dynamic";
 
@@ -12,12 +14,14 @@ type PageProps = {
 type PairingDetail = {
   id: string;
   pairing_date: string | null;
+  locale: string | null;
   literature_text: string | null;
   literature_source: string | null;
   literature_author: string | null;
   literature_work: string | null;
   literature_title: string | null;
   rationale_short: string | null;
+  curation_id: string | null;
   verse: VerseRow | null;
 };
 
@@ -26,7 +30,6 @@ type VerseRow = {
   translation: string | null;
   canonical_ref: string | null;
   verse_text: string | null;
-  text: string | null;
   book: string | null;
   chapter: number | null;
   verse: number | null;
@@ -40,6 +43,7 @@ const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export default async function DetailPage({ params }: PageProps) {
+  const requestId = randomUUID();
   const { id: pairingId } = await params;
   if (!pairingId || !UUID_REGEX.test(pairingId)) {
     return (
@@ -66,7 +70,7 @@ export default async function DetailPage({ params }: PageProps) {
   const { data: pairing, error: pairingError } = await supabase
     .from("pairings")
     .select(
-      "id, pairing_date, literature_text, literature_source, literature_author, literature_work, literature_title, rationale_short, verse_id",
+      "id, pairing_date, locale, literature_text, literature_source, literature_author, literature_work, literature_title, rationale_short, verse_id, curation_id",
     )
     .eq("status", "approved")
     .eq("id", pairingId)
@@ -104,7 +108,7 @@ export default async function DetailPage({ params }: PageProps) {
   if (rawPairing.verse_id) {
     const { data: verseRow, error: verseError } = await supabase
       .from("verses")
-      .select("id, translation, canonical_ref, verse_text, text, book, chapter, verse")
+      .select("id, translation, canonical_ref, verse_text, book, chapter, verse")
       .eq("id", rawPairing.verse_id)
       .maybeSingle();
 
@@ -112,6 +116,32 @@ export default async function DetailPage({ params }: PageProps) {
       console.error("Failed to load verse for pairing.", verseError);
     } else {
       verse = (verseRow as VerseRow) ?? null;
+    }
+  }
+
+  if (rawPairing) {
+    const missing: string[] = [];
+    if (!verse) {
+      missing.push("verse_row");
+    } else {
+      if (!verse.translation?.trim()) {
+        missing.push("translation");
+      }
+      if (!verse.verse_text?.trim()) {
+        missing.push("verse_text");
+      }
+    }
+    if (missing.length > 0) {
+      logWarn("pairing.join_failed", {
+        request_id: requestId,
+        route: "detail",
+        locale: rawPairing.locale ?? null,
+        pairing_id: rawPairing.id,
+        curation_id: rawPairing.curation_id ?? null,
+        verse_id: rawPairing.verse_id ?? null,
+        missing,
+        action: "omit_pairing",
+      });
     }
   }
 

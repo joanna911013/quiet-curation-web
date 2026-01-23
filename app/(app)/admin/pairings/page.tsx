@@ -225,9 +225,11 @@ async function fetchPairings(
     statusFilter,
   );
 
-  let { data, error } = await baseQuery
+  const initialResult = await baseQuery
     .order("pairing_date", { ascending: false })
     .order("updated_at", { ascending: false });
+  let data = initialResult.data as PairingRow[] | null;
+  let error = initialResult.error;
 
   if (error?.message?.includes("updated_at")) {
     const fallbackQuery = applyFilters(
@@ -238,9 +240,11 @@ async function fetchPairings(
       localeFilter,
       statusFilter,
     );
-    ({ data, error } = await fallbackQuery
+    const fallbackResult = await fallbackQuery
       .order("pairing_date", { ascending: false })
-      .order("created_at", { ascending: false }));
+      .order("created_at", { ascending: false });
+    data = fallbackResult.data as PairingRow[] | null;
+    error = fallbackResult.error;
     return {
       data: data as PairingRow[] | null,
       error: error?.message ?? null,
@@ -255,18 +259,23 @@ async function fetchPairings(
   };
 }
 
-function applyFilters(
-  query: any,
+function applyFilters<T>(
+  query: T,
   dateFilter: string,
   localeFilter: string,
   statusFilter: string,
-) {
-  let builder = query.eq("pairing_date", dateFilter).eq("locale", localeFilter);
+): T {
+  let builder = query as unknown as FilterableQuery;
+  builder = builder.eq("pairing_date", dateFilter).eq("locale", localeFilter);
   if (statusFilter !== "all") {
     builder = builder.eq("status", statusFilter);
   }
-  return builder;
+  return builder as unknown as T;
 }
+
+type FilterableQuery = {
+  eq: (column: string, value: string) => FilterableQuery;
+};
 
 function getSeoulDateString() {
   const formatter = new Intl.DateTimeFormat("en-CA", {

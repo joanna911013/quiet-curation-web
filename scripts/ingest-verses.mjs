@@ -52,6 +52,7 @@ const summary = await ingestRows(
   supabase,
   normalizedRows,
   options.batchSize,
+  options.updateExisting,
 );
 
 printIngestSummary(summary, normalizedRows.length);
@@ -104,6 +105,7 @@ function parseArgs(argv) {
     input: "",
     batchSize: DEFAULT_BATCH_SIZE,
     dryRun: false,
+    updateExisting: false,
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -120,6 +122,8 @@ function parseArgs(argv) {
       parsed.batchSize = Number(arg.split("=")[1] ?? DEFAULT_BATCH_SIZE);
     } else if (arg === "--dry-run") {
       parsed.dryRun = true;
+    } else if (arg === "--update-existing" || arg === "--update") {
+      parsed.updateExisting = true;
     }
   }
 
@@ -219,6 +223,16 @@ function normalizeText(value) {
   return String(value ?? "").replace(/\s+/g, " ").trim();
 }
 
+function resolveFullVerseText(primary, fallback) {
+  if (!primary) {
+    return fallback;
+  }
+  if (!fallback) {
+    return primary;
+  }
+  return primary.length >= fallback.length ? primary : fallback;
+}
+
 function isTitleCaseBook(book) {
   const allowedLower = new Set(["of", "the", "and"]);
   const parts = book.split(" ").filter(Boolean);
@@ -287,6 +301,8 @@ function validateRows(rows) {
     const book = normalizeText(raw.book);
     const canonicalRef = normalizeText(raw.canonical_ref);
     const verseText = normalizeText(raw.verse_text);
+    const legacyText = normalizeText(raw.text);
+    const resolvedVerseText = resolveFullVerseText(verseText, legacyText);
 
     if (!locale) {
       errors.push(`[row ${rowIndex}] locale is missing`);
@@ -320,8 +336,8 @@ function validateRows(rows) {
       }
     }
 
-    if (!verseText) {
-      errors.push(`[row ${rowIndex}] verse_text is missing`);
+    if (!resolvedVerseText) {
+      errors.push(`[row ${rowIndex}] verse_text/text is missing`);
     }
 
     if (errors.length > 0) {
@@ -336,8 +352,7 @@ function validateRows(rows) {
       chapter,
       verse,
       canonical_ref: canonicalRef,
-      verse_text: verseText,
-      text: verseText,
+      verse_text: resolvedVerseText,
     });
   });
 
@@ -357,10 +372,11 @@ function printValidationSummary(total, valid, rejected) {
   }
 }
 
-async function ingestRows(supabaseClient, rows, batchSize) {
+async function ingestRows(supabaseClient, rows, batchSize, updateExisting) {
   let inserted = 0;
   let skipped = 0;
   let failed = 0;
+  let upserted = 0;
   const errors = [];
 
   const batches = Math.ceil(rows.length / batchSize);
@@ -373,7 +389,7 @@ async function ingestRows(supabaseClient, rows, batchSize) {
       .from("verses")
       .upsert(batch, {
         onConflict: "locale,translation,book,chapter,verse",
-        ignoreDuplicates: true,
+        ignoreDuplicates: !updateExisting,
       })
       .select("id");
 
@@ -384,22 +400,31 @@ async function ingestRows(supabaseClient, rows, batchSize) {
       continue;
     }
 
-    const insertedCount = Array.isArray(data) ? data.length : 0;
-    inserted += insertedCount;
-    skipped += batch.length - insertedCount;
-    console.log(
-      `Batch ${i + 1}/${batches}: inserted ${insertedCount}, skipped ${batch.length - insertedCount}`,
-    );
+    const affectedCount = Array.isArray(data) ? data.length : 0;
+    if (updateExisting) {
+      upserted += affectedCount;
+      console.log(`Batch ${i + 1}/${batches}: upserted ${affectedCount}`);
+    } else {
+      inserted += affectedCount;
+      skipped += batch.length - affectedCount;
+      console.log(
+        `Batch ${i + 1}/${batches}: inserted ${affectedCount}, skipped ${batch.length - affectedCount}`,
+      );
+    }
   }
 
-  return { inserted, skipped, failed, errors };
+  return { inserted, skipped, failed, errors, upserted, updateExisting };
 }
 
 function printIngestSummary(summary, totalRows) {
   console.log("Ingest summary:");
   console.log("  Total rows:", totalRows);
-  console.log("  Inserted:", summary.inserted);
-  console.log("  Skipped (duplicates):", summary.skipped);
+  if (summary.updateExisting) {
+    console.log("  Upserted (inserted/updated):", summary.upserted);
+  } else {
+    console.log("  Inserted:", summary.inserted);
+    console.log("  Skipped (duplicates):", summary.skipped);
+  }
   console.log("  Failed:", summary.failed);
   if (summary.errors.length > 0) {
     console.log("  Sample errors:");

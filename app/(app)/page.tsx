@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { randomUUID } from "crypto";
 import { headers } from "next/headers";
 import { createSupabaseServer } from "@/lib/supabaseServer";
 import {
@@ -6,6 +7,8 @@ import {
   type TodayPairing,
   type VerseRow,
 } from "@/lib/queries/getTodayPairing";
+import { resolveVerseText } from "@/lib/verses";
+import { logError, logWarn } from "@/lib/observability";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +33,7 @@ const truncateAtWord = (text: string, max: number) => {
 };
 
 const getVerseText = (verse: VerseRow | null) =>
-  verse?.verse_text?.trim() || verse?.text?.trim() || "";
+  resolveVerseText(verse?.verse_text);
 
 const formatVerseReference = (verse: VerseRow | null) => {
   if (!verse) {
@@ -72,9 +75,52 @@ const resolveLocale = async () => {
 };
 
 export default async function HomePage() {
+  const requestId = randomUUID();
   const supabase = await createSupabaseServer();
   const locale = await resolveLocale();
-  const { pairing, error, isFallback } = await getTodayPairing(supabase, locale);
+  let pairing: TodayPairing | null = null;
+  let error: string | null = null;
+  let isFallback = false;
+  try {
+    const result = await getTodayPairing(supabase, locale);
+    pairing = result.pairing;
+    error = result.error;
+    isFallback = result.isFallback;
+  } catch (error) {
+    logError("today.fetch_failed", {
+      request_id: requestId,
+      route: "today",
+      locale,
+      has_pairing: false,
+      fallback_used: false,
+    }, error);
+    return (
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 pb-8 pt-8">
+        <header className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
+            Today
+          </p>
+          <h1 className="text-2xl font-semibold">Quiet Curation</h1>
+          <p className="text-sm text-neutral-500">
+            A calm daily pairing to start the day.
+          </p>
+        </header>
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+          Unable to load today&apos;s pairing.
+        </div>
+      </main>
+    );
+  }
+  if (error) {
+    logError("today.fetch_failed", {
+      request_id: requestId,
+      route: "today",
+      locale,
+      has_pairing: Boolean(pairing?.id),
+      fallback_used: isFallback,
+      error_message: error,
+    });
+  }
 
   const verse = pairing?.verse ?? null;
   const verseReference = pairing ? formatVerseReference(verse) : null;
@@ -84,6 +130,32 @@ export default async function HomePage() {
     ? truncateAtWord(pairing.literature_text, 140)
     : "";
   const attribution = pairing ? buildAttributionParts(pairing) : null;
+
+  if (pairing) {
+    const missing: string[] = [];
+    if (!verse) {
+      missing.push("verse_row");
+    } else {
+      if (!verse.translation?.trim()) {
+        missing.push("translation");
+      }
+      if (!verse.verse_text?.trim()) {
+        missing.push("verse_text");
+      }
+    }
+    if (missing.length > 0) {
+      logWarn("pairing.join_failed", {
+        request_id: requestId,
+        route: "today",
+        locale,
+        pairing_id: pairing.id,
+        curation_id: pairing.curation_id ?? null,
+        verse_id: pairing.verse_id ?? null,
+        missing,
+        action: "omit_pairing",
+      });
+    }
+  }
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 pb-8 pt-8">
