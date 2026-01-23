@@ -19,6 +19,12 @@ export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
 
   if (!cronSecret) {
+    logWarn("quiet_invite.auth_failed", {
+      request_id: requestId,
+      run_id: runId,
+      route: "cron/quiet-invite",
+      reason: "cron_secret_missing",
+    });
     return NextResponse.json(
       { error: "CRON_SECRET is not configured." },
       { status: 500 },
@@ -26,6 +32,12 @@ export async function GET(request: Request) {
   }
 
   if (authHeader !== `Bearer ${cronSecret}`) {
+    logWarn("quiet_invite.auth_failed", {
+      request_id: requestId,
+      run_id: runId,
+      route: "cron/quiet-invite",
+      reason: "invalid_auth",
+    });
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
