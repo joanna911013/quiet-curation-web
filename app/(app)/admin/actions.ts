@@ -392,14 +392,6 @@ async function validatePairing(
   }
 
   const explanation = pairing.explanations?.trim() ?? "";
-  if (explanation) {
-    const wordCount = countWords(explanation);
-    if (wordCount > EXPLANATIONS_MAX_WORDS) {
-      errors.push(
-        `Literature explanation exceeds ${EXPLANATIONS_MAX_WORDS} words.`,
-      );
-    }
-  }
 
   const rationale = pairing.rationale?.trim() ?? "";
   if (!rationale) {
