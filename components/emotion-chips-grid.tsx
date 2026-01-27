@@ -44,8 +44,8 @@ export function EmotionChipsGrid({
             className={joinClassNames(
               "min-h-[44px] rounded-full border px-4 text-sm font-medium transition",
               isSelected
-                ? "border-neutral-900 bg-neutral-900 text-white"
-                : "border-neutral-200 bg-white text-neutral-600 hover:border-neutral-400 hover:text-neutral-800",
+                ? "border-neutral-300 bg-neutral-100 text-neutral-800"
+                : "border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 hover:text-neutral-700",
             )}
           >
             {emotion.label}

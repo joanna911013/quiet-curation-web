@@ -45,9 +45,11 @@ export default async function NewPairingPage() {
           curation_id: "",
           literature_author: "",
           literature_title: "",
+          pub_year: "",
           literature_source: "",
           literature_text: "",
-          rationale_short: "",
+          explanations: "",
+          rationale: "",
         }}
       />
     </main>

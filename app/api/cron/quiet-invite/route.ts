@@ -414,7 +414,7 @@ async function fetchInviteContent(
   const { data: pairingRow, error: pairingError } = await client
     .from("pairings")
     .select(
-      "id, pairing_date, rationale_short, literature_text, literature_author, literature_title, literature_work, literature_source, verse_id",
+      "id, pairing_date, rationale, literature_text, literature_author, literature_title, literature_work, literature_source, verse_id",
     )
     .eq("id", curationId)
     .maybeSingle();
@@ -431,7 +431,7 @@ async function fetchInviteContent(
   const curation = {
     id: pairingRow.id,
     pairing_date: pairingRow.pairing_date,
-    rationale_short: pairingRow.rationale_short,
+    rationale: pairingRow.rationale,
     literature_text: pairingRow.literature_text,
     literature_title: pairingRow.literature_title,
     literature_work: pairingRow.literature_work,

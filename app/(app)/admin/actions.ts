@@ -14,7 +14,9 @@ export type PairingFormInput = {
   literature_title?: string | null;
   literature_source?: string | null;
   literature_text?: string | null;
-  rationale_short?: string | null;
+  pub_year?: string | null;
+  explanations?: string | null;
+  rationale?: string | null;
 };
 
 export type ActionResult =
@@ -31,7 +33,6 @@ type AdminContext =
   | { ok: false; error: string };
 
 const MAX_EXCERPT_WORDS = 70;
-const RATIONALE_MAX_CHARS = 240;
 
 async function requireAdmin(): Promise<AdminContext> {
   const supabase = await createSupabaseServer();
@@ -70,6 +71,8 @@ export async function savePairing(
   const locale = input.locale?.trim();
   const verseId = input.verse_id?.trim();
   const literatureText = input.literature_text?.trim() ?? "";
+  const explanations = input.explanations?.trim() ?? "";
+  const pubYear = normalizeYear(input.pub_year);
 
   const errors: string[] = [];
   if (!pairingDate) {
@@ -77,6 +80,9 @@ export async function savePairing(
   }
   if (!locale) {
     errors.push("Locale is required.");
+  }
+  if (input.pub_year?.trim() && pubYear === null) {
+    errors.push("Published year must be a valid number.");
   }
 
   if (errors.length) {
@@ -92,7 +98,9 @@ export async function savePairing(
     literature_title: normalizeOptional(input.literature_title),
     literature_source: normalizeOptional(input.literature_source),
     literature_text: literatureText || null,
-    rationale_short: normalizeOptional(input.rationale_short, ""),
+    pub_year: pubYear,
+    explanations: explanations || null,
+    rationale: normalizeOptional(input.rationale, ""),
   };
 
   if (input.status === "draft") {
@@ -174,7 +182,7 @@ export async function approvePairing(pairingId: string): Promise<ActionResult> {
   const { data: pairing, error: pairingError } = await admin.supabase
     .from("pairings")
     .select(
-      "id, pairing_date, locale, verse_id, literature_author, literature_title, literature_source, literature_text, rationale_short",
+      "id, pairing_date, locale, verse_id, literature_author, literature_title, literature_source, literature_text, pub_year, explanations, rationale",
     )
     .eq("id", pairingId)
     .maybeSingle();
@@ -317,7 +325,9 @@ async function validatePairing(
     literature_title: string | null;
     literature_source: string | null;
     literature_text: string | null;
-    rationale_short: string | null;
+    pub_year?: number | null;
+    explanations: string | null;
+    rationale: string | null;
   },
 ) {
   const errors: string[] = [];
@@ -381,11 +391,19 @@ async function validatePairing(
     }
   }
 
-  const rationale = pairing.rationale_short?.trim() ?? "";
+  const explanation = pairing.explanations?.trim() ?? "";
+  if (explanation) {
+    const wordCount = countWords(explanation);
+    if (wordCount > EXPLANATIONS_MAX_WORDS) {
+      errors.push(
+        `Literature explanation exceeds ${EXPLANATIONS_MAX_WORDS} words.`,
+      );
+    }
+  }
+
+  const rationale = pairing.rationale?.trim() ?? "";
   if (!rationale) {
     errors.push("Rationale is required.");
-  } else if (rationale.length > RATIONALE_MAX_CHARS) {
-    errors.push(`Rationale exceeds ${RATIONALE_MAX_CHARS} characters.`);
   }
 
   return errors;
@@ -397,6 +415,18 @@ function normalizeOptional(value?: string | null, fallback: string | null = null
     return fallback;
   }
   return trimmed;
+}
+
+function normalizeYear(value?: string | null) {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return null;
+  }
+  const parsed = Number.parseInt(trimmed, 10);
+  if (Number.isNaN(parsed)) {
+    return null;
+  }
+  return parsed;
 }
 
 async function findExistingPairing(

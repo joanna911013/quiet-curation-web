@@ -13,7 +13,9 @@ type PairingDetail = {
   literature_author: string | null;
   literature_work: string | null;
   literature_title: string | null;
-  rationale_short: string | null;
+  explanations: string | null;
+  rationale: string | null;
+  pub_year: number | null;
   verse: VerseRow | null;
 };
 
@@ -32,13 +34,6 @@ type DetailViewProps = {
   initialSaved: boolean;
   initialSavedAt: string | null;
 };
-
-const CLAMP_4_STYLE = {
-  display: "-webkit-box",
-  WebkitLineClamp: 4,
-  WebkitBoxOrient: "vertical",
-  overflow: "hidden",
-} as const;
 
 const trimText = (text: string) => text.replace(/\s+/g, " ").trim();
 
@@ -68,10 +63,11 @@ const formatVerseReference = (verse: VerseRow | null) => {
 const buildAttributionParts = (pairing: PairingDetail) => {
   const author = pairing.literature_author?.trim();
   const title = pairing.literature_title?.trim();
+  const year = pairing.pub_year ?? null;
   if (!author && !title) {
     return null;
   }
-  return { author: author || null, title: title || null };
+  return { author: author || null, title: title || null, year };
 };
 
 function BackIcon() {
@@ -116,12 +112,14 @@ export function DetailView({
     pairing.literature_source ||
     pairing.literature_work ||
     "Quiet Curation";
+  const pubYearLabel = pairing.pub_year ? ` · ${pairing.pub_year}` : "";
   const bodyText =
     pairing.literature_text?.trim() || "No reading text available.";
   const verseReference = formatVerseReference(pairing.verse);
   const verseText = getVerseText(pairing.verse);
   const showVerse = Boolean(verseReference && verseText);
-  const rationale = pairing.rationale_short?.trim();
+  const rationale = pairing.rationale?.trim();
+  const explanation = pairing.explanations?.trim();
   const attribution = buildAttributionParts(pairing);
 
   const metaParts = [];
@@ -158,8 +156,17 @@ export function DetailView({
       </header>
       <div className="readingBody">
         <div className="readingContent">
+          <h1 className="readingTitle">{title}</h1>
+          <div className="readingMetaLine">
+            {authorOrSourceLine}
+            {pubYearLabel}
+          </div>
+          <p className="readingText">{bodyText}</p>
+
+          <div className="my-6 h-px bg-neutral-200/70" />
+
           {showVerse ? (
-            <div className="rounded-2xl border border-neutral-200/80 bg-white p-4">
+            <div>
               <div className="text-xs font-semibold text-neutral-500 truncate">
                 {verseReference}
               </div>
@@ -168,45 +175,43 @@ export function DetailView({
               </p>
             </div>
           ) : (
-            <div className="rounded-2xl border border-neutral-200/80 bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
+            <div className="text-sm text-neutral-600">
               <p>Verse unavailable right now.</p>
               <p className="text-xs text-neutral-500">
                 Pull to refresh or try again.
               </p>
             </div>
           )}
-          <h1 className="readingTitle">{title}</h1>
-          <div className="readingMetaLine">{authorOrSourceLine}</div>
-          <p className="readingText">{bodyText}</p>
+          {explanation ? (
+            <div className="rounded-2xl border border-neutral-200/80 bg-neutral-50 px-4 py-3">
+              <p className="text-[13px] font-semibold text-neutral-600">
+                About the literature
+              </p>
+              <p className="mt-1 text-sm text-neutral-600">
+                {trimText(explanation)}
+              </p>
+            </div>
+          ) : null}
           {rationale ? (
             <div className="rounded-2xl border border-neutral-200/80 bg-neutral-50 px-4 py-3">
               <p className="text-[13px] font-semibold text-neutral-600">
-                Why this pairing?
+                Explanations
               </p>
-              <p
-                className="mt-1 text-sm text-neutral-600"
-                style={CLAMP_4_STYLE}
-              >
+              <p className="mt-1 text-sm text-neutral-600">
                 {trimText(rationale)}
               </p>
             </div>
           ) : null}
-          {attribution || verseReference ? (
-            <div className="text-xs text-neutral-500">
-              {attribution ? (
-                <p>
-                  &mdash;{" "}
-                  {attribution.author ? (
-                    <span>{attribution.author}</span>
-                  ) : null}
-                  {attribution.author && attribution.title ? ", " : null}
-                  {attribution.title ? (
-                    <em className="italic">{attribution.title}</em>
-                  ) : null}
-                </p>
+          {attribution ? (
+            <p className="text-xs text-neutral-500 truncate">
+              &mdash;{" "}
+              {attribution.author ? <span>{attribution.author}</span> : null}
+              {attribution.author && attribution.title ? ", " : null}
+              {attribution.title ? (
+                <em className="italic">{attribution.title}</em>
               ) : null}
-              {verseReference ? <p>{verseReference}</p> : null}
-            </div>
+              {attribution.year ? ` (${attribution.year})` : null}
+            </p>
           ) : null}
           {saveError ? (
             <p className="text-xs text-rose-500">{saveError}</p>

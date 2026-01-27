@@ -16,7 +16,7 @@ type PairingRow = {
   id: string;
   pairing_date: string;
   locale: string;
-  rationale_short: string | null;
+  rationale: string | null;
   literature_text: string;
   literature_source: string | null;
   literature_author: string | null;
@@ -61,8 +61,8 @@ const formatSavedAt = (timestamp: string) =>
   new Date(timestamp).toLocaleString();
 
 const buildLiteratureLine = (pairing: PairingRow) => {
-  if (pairing.rationale_short?.trim()) {
-    return truncateText(pairing.rationale_short, 140);
+  if (pairing.rationale?.trim()) {
+    return truncateText(pairing.rationale, 140);
   }
   if (pairing.literature_text?.trim()) {
     return truncateText(pairing.literature_text, 140);
@@ -94,7 +94,7 @@ export default async function SavedPage() {
 
   if (savedError) {
     return (
-      <main className="mx-auto w-full max-w-xl px-5 pb-16 pt-8">
+      <main className="mx-auto w-full max-w-xl px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-8">
         <p className="text-sm text-neutral-500">
           Unable to load saved items right now.
         </p>
@@ -118,7 +118,7 @@ export default async function SavedPage() {
     const { data: pairingRows, error: pairingError } = await supabase
       .from("pairings")
       .select(
-        "id, pairing_date, locale, rationale_short, literature_text, literature_source, literature_author, literature_title, literature_work, verse_id",
+        "id, pairing_date, locale, rationale, literature_text, literature_source, literature_author, literature_title, literature_work, verse_id",
       )
       .eq("status", "approved")
       .in("id", pairingIds);
@@ -126,7 +126,7 @@ export default async function SavedPage() {
     if (pairingError) {
       console.error("Failed to load saved pairings.", pairingError);
       return (
-        <main className="mx-auto w-full max-w-xl px-5 pb-16 pt-8">
+        <main className="mx-auto w-full max-w-xl px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-8">
           <p className="text-sm text-neutral-500">
             Unable to load saved items right now.
           </p>
@@ -155,7 +155,7 @@ export default async function SavedPage() {
       if (verseError) {
         console.error("Failed to load verses for saved items.", verseError);
         return (
-          <main className="mx-auto w-full max-w-xl px-5 pb-16 pt-8">
+          <main className="mx-auto w-full max-w-xl px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-8">
             <p className="text-sm text-neutral-500">
               Unable to load saved items right now.
             </p>
@@ -206,7 +206,7 @@ export default async function SavedPage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-col gap-6 px-5 pb-16 pt-8">
+    <main className="mx-auto flex w-full max-w-xl flex-col gap-6 px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-8">
       <header className="space-y-2">
         <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
           Saved

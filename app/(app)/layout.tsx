@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { AppHeader } from "@/components/app-header";
 import { createSupabaseServer } from "@/lib/supabaseServer";
+import { AppHeader } from "@/components/app-header";
+
+export const dynamic = "force-dynamic";
 
 type AppLayoutProps = {
   children: ReactNode;

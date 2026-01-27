@@ -12,26 +12,6 @@ import { logError, logWarn } from "@/lib/observability";
 
 export const dynamic = "force-dynamic";
 
-const CLAMP_2_STYLE = {
-  display: "-webkit-box",
-  WebkitLineClamp: 2,
-  WebkitBoxOrient: "vertical",
-  overflow: "hidden",
-} as const;
-
-const trimText = (text: string) => text.replace(/\s+/g, " ").trim();
-
-const truncateAtWord = (text: string, max: number) => {
-  const cleaned = trimText(text);
-  if (cleaned.length <= max) {
-    return cleaned;
-  }
-  const slice = cleaned.slice(0, max);
-  const lastSpace = slice.lastIndexOf(" ");
-  const trimmed = lastSpace > 0 ? slice.slice(0, lastSpace) : slice;
-  return `${trimmed.trimEnd()}...`;
-};
-
 const getVerseText = (verse: VerseRow | null) =>
   resolveVerseText(verse?.verse_text);
 
@@ -58,10 +38,11 @@ const formatVerseReference = (verse: VerseRow | null) => {
 const buildAttributionParts = (pairing: TodayPairing) => {
   const author = pairing.literature_author?.trim();
   const title = pairing.literature_title?.trim();
+  const year = pairing.pub_year ?? null;
   if (!author && !title) {
     return null;
   }
-  return { author: author || null, title: title || null };
+  return { author: author || null, title: title || null, year };
 };
 
 const resolveLocale = async () => {
@@ -95,7 +76,7 @@ export default async function HomePage() {
       fallback_used: false,
     }, error);
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 pb-8 pt-8">
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-8">
         <header className="space-y-2">
           <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
             Today
@@ -125,11 +106,10 @@ export default async function HomePage() {
   const verse = pairing?.verse ?? null;
   const verseReference = pairing ? formatVerseReference(verse) : null;
   const verseText = pairing ? getVerseText(verse) : "";
-  const versePreview = verseText;
-  const literaturePreview = pairing?.literature_text
-    ? truncateAtWord(pairing.literature_text, 140)
-    : "";
+  const literatureText = pairing?.literature_text?.trim() ?? "";
   const attribution = pairing ? buildAttributionParts(pairing) : null;
+  const ctaHint =
+    locale === "ko" ? "연결고리 보려면 클릭" : "Click to see explanations";
 
   if (pairing) {
     const missing: string[] = [];
@@ -158,7 +138,7 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 pb-8 pt-8">
+    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-8">
       <header className="space-y-2">
         <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
           Today
@@ -175,36 +155,43 @@ export default async function HomePage() {
         </div>
       ) : null}
 
-      {pairing && verseReference && versePreview ? (
+      {pairing && verseReference && verseText ? (
         <Link
           href={`/c/${pairing.id}`}
           data-fallback={isFallback ? "true" : "false"}
           className="rounded-2xl border border-neutral-200/80 bg-white p-4 transition hover:border-neutral-300"
         >
-          <div className="text-xs font-semibold text-neutral-500 truncate">
-            {verseReference}
-          </div>
-          <p className="mt-2 whitespace-pre-line text-[17px] leading-relaxed text-neutral-900">
-            {versePreview}
-          </p>
-          {literaturePreview ? (
-            <p
-              className="mt-3 text-sm text-neutral-600"
-              style={CLAMP_2_STYLE}
-            >
-              {literaturePreview}
-            </p>
-          ) : null}
-          {attribution ? (
-            <p className="mt-2 text-xs text-neutral-500">
-              &mdash;{" "}
-              {attribution.author ? <span>{attribution.author}</span> : null}
-              {attribution.author && attribution.title ? ", " : null}
-              {attribution.title ? (
-                <em className="italic">{attribution.title}</em>
+          {literatureText ? (
+            <div className="rounded-2xl border border-neutral-200/70 bg-neutral-50/60 p-4">
+              <p className="text-[17px] leading-relaxed text-neutral-700 whitespace-pre-line break-words">
+                {literatureText}
+              </p>
+              {attribution ? (
+                <p className="mt-3 text-xs text-neutral-500 truncate">
+                  &mdash;{" "}
+                  {attribution.author ? <span>{attribution.author}</span> : null}
+                  {attribution.author && attribution.title ? ", " : null}
+                  {attribution.title ? (
+                    <em className="italic">{attribution.title}</em>
+                  ) : null}
+                  {attribution.year ? ` (${attribution.year})` : null}
+                </p>
               ) : null}
-            </p>
+            </div>
           ) : null}
+          <div className="mt-4 rounded-2xl border border-neutral-200/70 bg-white p-4">
+            <div className="text-xs font-semibold text-neutral-500 truncate">
+              {verseReference}
+            </div>
+            <p className="mt-2 whitespace-pre-line break-words text-[17px] leading-relaxed text-neutral-900">
+              {verseText}
+            </p>
+          </div>
+          <div className="mt-4">
+            <div className="button buttonGhost pointer-events-none select-none">
+              {ctaHint}
+            </div>
+          </div>
         </Link>
       ) : null}
 

@@ -10,7 +10,7 @@ type QuietInviteCuration = {
   id: string;
   title?: string | null;
   excerpt?: string | null;
-  rationale_short?: string | null;
+  rationale?: string | null;
   summary?: string | null;
   literature_text?: string | null;
   literature_title?: string | null;

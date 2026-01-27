@@ -20,7 +20,9 @@ type PairingDetail = {
   literature_author: string | null;
   literature_work: string | null;
   literature_title: string | null;
-  rationale_short: string | null;
+  explanations: string | null;
+  rationale: string | null;
+  pub_year: number | null;
   curation_id: string | null;
   verse: VerseRow | null;
 };
@@ -47,7 +49,7 @@ export default async function DetailPage({ params }: PageProps) {
   const { id: pairingId } = await params;
   if (!pairingId || !UUID_REGEX.test(pairingId)) {
     return (
-      <main className="mx-auto w-full max-w-xl px-5 pb-16 pt-8">
+      <main className="mx-auto w-full max-w-xl px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-8">
         <p className="text-sm text-neutral-500">Reading not found.</p>
         <Link
           href="/"
@@ -70,7 +72,7 @@ export default async function DetailPage({ params }: PageProps) {
   const { data: pairing, error: pairingError } = await supabase
     .from("pairings")
     .select(
-      "id, pairing_date, locale, literature_text, literature_source, literature_author, literature_work, literature_title, rationale_short, verse_id, curation_id",
+      "id, pairing_date, locale, literature_text, literature_source, literature_author, literature_work, literature_title, explanations, rationale, pub_year, verse_id, curation_id",
     )
     .eq("status", "approved")
     .eq("id", pairingId)
@@ -79,7 +81,7 @@ export default async function DetailPage({ params }: PageProps) {
   if (pairingError) {
     console.error("Failed to load pairing detail.", pairingError);
     return (
-      <main className="mx-auto w-full max-w-xl px-5 pb-16 pt-8">
+      <main className="mx-auto w-full max-w-xl px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-8">
         <p className="text-sm text-neutral-500">Unable to load reading.</p>
         <Link
           href="/"
@@ -93,7 +95,7 @@ export default async function DetailPage({ params }: PageProps) {
 
   if (!pairing) {
     return (
-      <main className="mx-auto w-full max-w-xl px-5 pb-16 pt-8">
+      <main className="mx-auto w-full max-w-xl px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-8">
         <p className="text-sm text-neutral-500">Reading not found.</p>
         <Link href="/" className="mt-4 inline-flex text-xs text-neutral-500 underline">
           Back to Home

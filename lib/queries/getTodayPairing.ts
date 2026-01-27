@@ -21,7 +21,8 @@ export type TodayPairing = {
   literature_author: string | null;
   literature_title: string | null;
   literature_work: string | null;
-  rationale_short: string | null;
+  pub_year: number | null;
+  rationale: string | null;
   verse_id: string | null;
   created_at?: string | null;
   verse: VerseRow | null;
@@ -35,7 +36,7 @@ type PairingQueryResult = {
 };
 
 const PAIRING_SELECT =
-  "id, pairing_date, locale, status, curation_id, literature_text, literature_source, literature_author, literature_title, literature_work, rationale_short, verse_id, created_at";
+  "id, pairing_date, locale, status, curation_id, literature_text, literature_source, literature_author, literature_title, literature_work, pub_year, rationale, verse_id, created_at";
 
 export async function getTodayPairing(
   supabase: Awaited<ReturnType<typeof createSupabaseServer>>,

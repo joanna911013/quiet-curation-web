@@ -2,7 +2,7 @@ type QuietInviteCuration = {
   id: string;
   title?: string | null;
   excerpt?: string | null;
-  rationale_short?: string | null;
+  rationale?: string | null;
   summary?: string | null;
   literature_text?: string | null;
   literature_title?: string | null;
@@ -48,7 +48,7 @@ export function renderQuietInviteEmail(
   const excerpt =
     firstNonEmpty(
       curation.excerpt,
-      curation.rationale_short,
+      curation.rationale,
       curation.summary,
       curation.literature_text,
     ) || "Open the app to read today's curation.";

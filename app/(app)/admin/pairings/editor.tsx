@@ -34,9 +34,11 @@ export function PairingEditor({ initial, today }: PairingEditorProps) {
     curation_id: initial.curation_id ?? "",
     literature_author: initial.literature_author ?? "",
     literature_title: initial.literature_title ?? "",
+    pub_year: initial.pub_year ? String(initial.pub_year) : "",
     literature_source: initial.literature_source ?? "",
     literature_text: initial.literature_text ?? "",
-    rationale_short: initial.rationale_short ?? "",
+    explanations: initial.explanations ?? "",
+    rationale: initial.rationale ?? "",
   });
   const [saveErrors, setSaveErrors] = useState<string[]>(EMPTY_ERRORS);
   const [approveErrors, setApproveErrors] = useState<string[]>(EMPTY_ERRORS);
@@ -308,6 +310,16 @@ export function PairingEditor({ initial, today }: PairingEditorProps) {
           />
         </label>
         <label className="flex flex-col gap-2 text-sm text-neutral-600">
+          Published year (optional)
+          <input
+            type="number"
+            inputMode="numeric"
+            value={form.pub_year ?? ""}
+            onChange={(event) => updateField("pub_year", event.target.value)}
+            className="rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-900"
+          />
+        </label>
+        <label className="flex flex-col gap-2 text-sm text-neutral-600">
           Literature source
           <input
             type="text"
@@ -330,13 +342,22 @@ export function PairingEditor({ initial, today }: PairingEditorProps) {
           />
         </label>
         <label className="flex flex-col gap-2 text-sm text-neutral-600 md:col-span-2">
-          Rationale (short)
+          Literature explanation (optional)
           <textarea
-            value={form.rationale_short ?? ""}
+            value={form.explanations ?? ""}
+            onChange={(event) => updateField("explanations", event.target.value)}
+            rows={4}
+            className="rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-900"
+          />
+        </label>
+        <label className="flex flex-col gap-2 text-sm text-neutral-600 md:col-span-2">
+          Rationale
+          <textarea
+            value={form.rationale ?? ""}
             onChange={(event) =>
-              updateField("rationale_short", event.target.value)
+              updateField("rationale", event.target.value)
             }
-            rows={3}
+            rows={6}
             className="rounded-lg border border-neutral-200 px-3 py-2 text-sm text-neutral-900"
           />
         </label>
