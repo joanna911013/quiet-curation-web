@@ -9,6 +9,7 @@ import {
 } from "@/lib/queries/getTodayPairing";
 import { resolveVerseText } from "@/lib/verses";
 import { logError, logWarn } from "@/lib/observability";
+import { RetryButton } from "@/components/retry-button";
 
 export const dynamic = "force-dynamic";
 
@@ -89,6 +90,7 @@ export default async function HomePage() {
         <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
           Unable to load today&apos;s pairing.
         </div>
+        <RetryButton className="self-start" />
       </main>
     );
   }
@@ -150,8 +152,11 @@ export default async function HomePage() {
       </header>
 
       {error && !pairing ? (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
-          Unable to load today&apos;s pairing.
+        <div className="flex flex-col gap-3">
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+            Unable to load today&apos;s pairing.
+          </div>
+          <RetryButton className="self-start" />
         </div>
       ) : null}
 

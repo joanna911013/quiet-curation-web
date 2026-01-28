@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServer } from "@/lib/supabaseServer";
 import { DetailView } from "./detail-view";
 import { logWarn } from "@/lib/observability";
+import { RetryButton } from "@/components/retry-button";
 
 export const dynamic = "force-dynamic";
 
@@ -83,6 +84,7 @@ export default async function DetailPage({ params }: PageProps) {
     return (
       <main className="mx-auto w-full max-w-xl px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-8">
         <p className="text-sm text-neutral-500">Unable to load reading.</p>
+        <RetryButton className="mt-4" />
         <Link
           href="/"
           className="mt-4 inline-flex text-xs text-neutral-500 underline"
