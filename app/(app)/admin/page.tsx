@@ -130,11 +130,11 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       </div>
 
       {showWarning ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-neutral-200/80 bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
           <span>Today pairing missing</span>
           <Link
             href={`/admin/pairings?date=${today}&locale=${warningLocale}&status=all`}
-            className="text-xs font-semibold uppercase tracking-[0.1em] text-amber-700 underline"
+            className="text-xs font-semibold uppercase tracking-[0.1em] text-neutral-600 underline"
           >
             Review today
           </Link>
