@@ -165,11 +165,50 @@ export default async function DetailPage({ params }: PageProps) {
     console.error("Unable to load saved state.", savedError);
   }
 
+  const metaLine = buildMetaLine(resolvedPairing, savedRow?.created_at ?? null);
+
   return (
     <DetailView
       pairing={resolvedPairing}
       initialSaved={Boolean(savedRow)}
       initialSavedAt={savedRow?.created_at ?? null}
+      metaLine={metaLine}
     />
   );
+}
+
+function formatMetaDate(value: string | null | undefined) {
+  if (!value) {
+    return null;
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return date.toISOString().slice(0, 10);
+}
+
+function formatMetaDateTime(value: string | null | undefined) {
+  if (!value) {
+    return null;
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return date.toISOString().replace("T", " ").slice(0, 19);
+}
+
+function buildMetaLine(pairing: PairingDetail, savedAt: string | null) {
+  const metaParts: string[] = [];
+  const pairingDate = formatMetaDate(pairing.pairing_date);
+  if (pairingDate) {
+    metaParts.push(`Date ${pairingDate}`);
+  }
+  metaParts.push(`ID ${pairing.id}`);
+  const savedAtLabel = formatMetaDateTime(savedAt);
+  if (savedAtLabel) {
+    metaParts.push(`Saved ${savedAtLabel}`);
+  }
+  return metaParts.join(" · ");
 }

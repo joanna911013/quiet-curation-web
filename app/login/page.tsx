@@ -51,7 +51,9 @@ export default function LoginPage() {
     setError("");
     setDismissQueryError(true);
     setIsSending(true);
-    const callbackUrl = new URL("/auth/callback", window.location.origin);
+    const baseUrl =
+      process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
+    const callbackUrl = new URL("/auth/callback", baseUrl);
     callbackUrl.searchParams.set("redirect", safeRedirect);
     const { error: signInError } = await supabase.auth.signInWithOtp({
       email,

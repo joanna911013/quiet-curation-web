@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: rootDir,
   },
+  allowedDevOrigins: [
+    "http://192.168.45.99:3000",
+    "http://localhost:3000",
+  ],
 };
 
 export default withNextIntl(nextConfig);

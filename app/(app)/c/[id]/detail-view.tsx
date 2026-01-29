@@ -33,6 +33,7 @@ type DetailViewProps = {
   pairing: PairingDetail;
   initialSaved: boolean;
   initialSavedAt: string | null;
+  metaLine: string;
 };
 
 const trimText = (text: string) => text.replace(/\s+/g, " ").trim();
@@ -92,6 +93,7 @@ export function DetailView({
   pairing,
   initialSaved,
   initialSavedAt,
+  metaLine,
 }: DetailViewProps) {
   const router = useRouter();
   const [saved, setSaved] = useState(initialSaved);
@@ -121,17 +123,6 @@ export function DetailView({
   const rationale = pairing.rationale?.trim();
   const explanation = pairing.explanations?.trim();
   const attribution = buildAttributionParts(pairing);
-
-  const metaParts = [];
-  if (pairing.pairing_date) {
-    metaParts.push(
-      `Date ${new Date(pairing.pairing_date).toLocaleDateString()}`,
-    );
-  }
-  metaParts.push(`ID ${pairing.id}`);
-  if (savedAt) {
-    metaParts.push(`Saved ${new Date(savedAt).toLocaleString()}`);
-  }
 
   return (
     <section className="readingContainer">
@@ -216,7 +207,7 @@ export function DetailView({
           {saveError ? (
             <p className="text-xs text-rose-500">{saveError}</p>
           ) : null}
-          <div className="readingFootnote">{metaParts.join(" · ")}</div>
+          <div className="readingFootnote">{metaLine}</div>
         </div>
       </div>
     </section>

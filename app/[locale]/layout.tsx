@@ -22,7 +22,6 @@ export default async function LocaleLayout({
         locale="en"
         messages={enMessages}
         timeZone="UTC"
-        now={new Date()}
         formats={{}}
       >
         {children}
@@ -36,7 +35,6 @@ export default async function LocaleLayout({
         locale="ko"
         messages={koMessages}
         timeZone="UTC"
-        now={new Date()}
         formats={{}}
       >
         {children}

@@ -391,8 +391,6 @@ async function validatePairing(
     }
   }
 
-  const explanation = pairing.explanations?.trim() ?? "";
-
   const rationale = pairing.rationale?.trim() ?? "";
   if (!rationale) {
     errors.push("Rationale is required.");

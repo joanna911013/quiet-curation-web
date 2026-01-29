@@ -23,6 +23,14 @@ type PairingEditorProps = {
 
 const EMPTY_ERRORS: string[] = [];
 
+const formatTimestamp = (value: string) => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return date.toISOString().replace("T", " ").slice(0, 19);
+};
+
 export function PairingEditor({ initial, today }: PairingEditorProps) {
   const router = useRouter();
   const [form, setForm] = useState<PairingFormInput>({
@@ -57,7 +65,7 @@ export function PairingEditor({ initial, today }: PairingEditorProps) {
     if (!lastSavedAt) {
       return "Not saved yet.";
     }
-    return `Last saved ${new Date(lastSavedAt).toLocaleString()}`;
+    return `Last saved ${formatTimestamp(lastSavedAt)}`;
   }, [lastSavedAt]);
 
   const updateField = (key: keyof PairingFormInput, value: string) => {
