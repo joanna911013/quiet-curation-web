@@ -14,13 +14,17 @@ export default function LoginPage() {
   const [isSending, setIsSending] = useState(false);
   const [linkSent, setLinkSent] = useState(false);
   const [dismissQueryError, setDismissQueryError] = useState(false);
+  const [isInAppBrowser, setIsInAppBrowser] = useState(false);
 
   const queryError =
     searchParams.get("error_description") ||
     searchParams.get("error_code") ||
     searchParams.get("error") ||
     "";
-  const displayError = error || (!dismissQueryError ? queryError : "");
+  const displayError = formatAuthError(
+    error || (!dismissQueryError ? queryError : ""),
+    isInAppBrowser,
+  );
   const safeRedirect = sanitizeRedirect(redirectParam);
 
   useEffect(() => {
@@ -42,6 +46,18 @@ export default function LoginPage() {
       isActive = false;
     };
   }, [router, safeRedirect]);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined") {
+      return;
+    }
+    const ua = navigator.userAgent || "";
+    const inApp =
+      /KAKAOTALK|KakaoTalk|NAVER|Daum|FBAN|FBAV|Instagram|Line|Twitter|Snapchat/i.test(
+        ua,
+      );
+    setIsInAppBrowser(inApp);
+  }, []);
 
   const handleContinue = async () => {
     if (!email.includes("@")) {
@@ -105,6 +121,11 @@ export default function LoginPage() {
 
         {displayError ? (
           <p className="text-xs text-rose-500">{displayError}</p>
+        ) : isInAppBrowser ? (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-700">
+            In-app browsers can block magic links. Open this page in Safari or
+            Chrome, then request the link again.
+          </div>
         ) : linkSent ? (
           <p className="text-xs text-neutral-400">
             Check your inbox for a sign-in link.
@@ -131,6 +152,22 @@ function sanitizeRedirect(value: string | null) {
   }
   if (value.toLowerCase().includes("http")) {
     return "/";
+  }
+  return value;
+}
+
+function formatAuthError(value: string, isInAppBrowser: boolean) {
+  if (!value) {
+    return "";
+  }
+  const lower = value.toLowerCase();
+  if (lower.includes("pkce_code_verifier_not_found")) {
+    return isInAppBrowser
+      ? "This link must be opened in the same browser. Open in Safari/Chrome and request a new link."
+      : "Please open the link in the same browser where you requested it.";
+  }
+  if (lower.includes("auth_failed") && isInAppBrowser) {
+    return "Sign-in failed in the in-app browser. Open in Safari/Chrome and try again.";
   }
   return value;
 }
