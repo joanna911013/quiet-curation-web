@@ -73,11 +73,10 @@ export default async function HomePage() {
   const requestId = randomUUID();
   const supabase = await createSupabaseServer();
   const locale = await resolveLocale();
-  const todayLabel = locale === "ko" ? "오늘" : "Today";
   const tagline =
     locale === "ko"
-      ? "하루를 시작하는 고요한 페어링."
-      : "A calm daily pairing to start the day.";
+      ? "오늘의 문학x성경 페어링으로 차분한 하루를 시작해보세요."
+      : "Start your day with this calm daily pairing of literature and verse.";
   let pairing: TodayPairing | null = null;
   let error: string | null = null;
   let isFallback = false;
@@ -97,9 +96,6 @@ export default async function HomePage() {
     return (
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-8">
         <header className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
-            {todayLabel}
-          </p>
           <h1 className="text-2xl font-semibold">Quiet Curation</h1>
           <p className="text-sm text-neutral-500">
             {tagline}
@@ -133,7 +129,7 @@ export default async function HomePage() {
   const attribution = pairing ? buildAttributionParts(pairing) : null;
   const ctaHint =
     locale === "ko" ? "연결고리 보려면 클릭" : "Click to see explanations";
-  const headerDate = formatHeaderDate(pairing?.pairing_date, locale);
+  const headerDate = formatHeaderDate(null, locale);
 
   if (pairing) {
     const missing: string[] = [];
@@ -164,9 +160,6 @@ export default async function HomePage() {
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-8">
       <header className="space-y-2">
-        <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
-          {todayLabel}
-        </p>
         <h1 className="text-2xl font-semibold">Quiet Curation</h1>
         <p className="text-sm text-neutral-500">
           {tagline}

@@ -63,11 +63,10 @@ export function renderQuietInviteEmail(
   const isKo =
     typeof curation.locale === "string" &&
     curation.locale.toLowerCase().startsWith("ko");
-  const todayLabel = isKo ? "오늘" : "Today";
   const headerTagline = isKo
-    ? "하루를 시작하는 고요한 페어링."
-    : "A calm daily pairing to start the day.";
-  const headerDate = formatEmailDate(curation.pairing_date, isKo);
+    ? "오늘의 문학x성경 페어링으로 차분한 하루를 시작해보세요."
+    : "Start your day with this calm daily pairing of literature and verse.";
+  const headerDate = formatEmailDate(null, isKo);
   const rationaleHeading = isKo ? "연결고리 설명" : "Why this pairing?";
 
   const pairingSection = pairing ? renderPairingSection(pairing) : "";
@@ -94,9 +93,6 @@ export function renderQuietInviteEmail(
   </head>
   <body style="margin:0;padding:0;background-color:#f7f3ef;font-family:Helvetica,Arial,sans-serif;color:#2d2721;">
     <div style="max-width:640px;margin:0 auto;padding:28px;">
-      <p style="margin:0 0 12px 0;font-size:12px;letter-spacing:0.28em;text-transform:uppercase;color:#8c7f76;">
-        ${escapeHtml(todayLabel)}
-      </p>
       <h1 style="margin:0 0 6px 0;font-size:28px;line-height:1.25;color:#1f1a16;">
         Quiet Curation
       </h1>
