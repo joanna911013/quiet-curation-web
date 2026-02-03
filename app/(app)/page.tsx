@@ -168,6 +168,9 @@ export default async function HomePage() {
         >
           {literatureText ? (
             <div className="rounded-2xl border border-neutral-200/70 bg-neutral-50/60 p-4">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-neutral-400">
+                Reading
+              </div>
               <p className="text-[17px] leading-relaxed text-neutral-700 whitespace-pre-line break-words">
                 {literatureText}
               </p>
@@ -185,6 +188,9 @@ export default async function HomePage() {
             </div>
           ) : null}
           <div className="mt-4 rounded-2xl border border-neutral-200/70 bg-white p-4">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-neutral-400">
+              Verse
+            </div>
             <div className="text-xs font-semibold text-neutral-500 truncate">
               {verseReference}
             </div>

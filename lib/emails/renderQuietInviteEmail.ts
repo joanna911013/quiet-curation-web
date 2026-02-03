@@ -48,15 +48,27 @@ export function renderQuietInviteEmail(
   const excerpt =
     firstNonEmpty(
       curation.excerpt,
-      curation.rationale,
       curation.summary,
       curation.literature_text,
     ) || "Open the app to read today's curation.";
+  const rationale = firstNonEmpty(curation.rationale);
   const dateLine = curation.pairing_date
     ? `For ${new Date(curation.pairing_date).toLocaleDateString()}`
     : "";
 
   const pairingSection = pairing ? renderPairingSection(pairing) : "";
+  const rationaleSection = rationale
+    ? `
+      <div style="margin-top:18px;border:1px solid #eadfd7;background-color:#fffaf6;border-radius:14px;padding:16px;">
+        <div style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#8c7f76;margin-bottom:6px;">
+          Why this pairing?
+        </div>
+        <div style="font-size:14px;line-height:1.6;color:#3a332c;">
+          ${escapeHtml(rationale)}
+        </div>
+      </div>
+    `
+    : "";
   const subject = `Quiet Curation: ${title}`;
 
   const html = `<!doctype html>
@@ -83,6 +95,7 @@ export function renderQuietInviteEmail(
         ${escapeHtml(excerpt)}
       </p>
       ${pairingSection}
+      ${rationaleSection}
       <a href="${deepLink}" style="display:inline-block;margin-top:24px;background-color:#1f1a16;color:#f7f3ef;text-decoration:none;padding:12px 18px;border-radius:999px;font-size:14px;letter-spacing:0.02em;">
         Open today's reading
       </a>
@@ -120,31 +133,9 @@ function renderPairingSection(pairing: QuietInvitePairing) {
 
   const blocks: string[] = [];
 
-  if (verseReference || verseText) {
-    blocks.push(`
-      <div style="margin-bottom:16px;">
-        <div style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#8c7f76;margin-bottom:6px;">Verse</div>
-        ${
-          verseReference
-            ? `<div style="font-size:15px;font-weight:600;margin-bottom:6px;color:#1f1a16;">${escapeHtml(
-                verseReference,
-              )}${translation ? ` (${escapeHtml(translation)})` : ""}</div>`
-            : ""
-        }
-        ${
-          verseText
-            ? `<div style="font-size:14px;line-height:1.6;color:#3a332c;">${escapeHtml(
-                verseText,
-              )}</div>`
-            : ""
-        }
-      </div>
-    `);
-  }
-
   if (literatureLine || literatureText) {
     blocks.push(`
-      <div>
+      <div style="margin-bottom:16px;">
         <div style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#8c7f76;margin-bottom:6px;">Reading</div>
         ${
           literatureLine
@@ -157,6 +148,28 @@ function renderPairingSection(pairing: QuietInvitePairing) {
           literatureText
             ? `<div style="font-size:14px;line-height:1.6;color:#3a332c;">${escapeHtml(
                 literatureText,
+              )}</div>`
+            : ""
+        }
+      </div>
+    `);
+  }
+
+  if (verseReference || verseText) {
+    blocks.push(`
+      <div>
+        <div style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#8c7f76;margin-bottom:6px;">Verse</div>
+        ${
+          verseReference
+            ? `<div style="font-size:15px;font-weight:600;margin-bottom:6px;color:#1f1a16;">${escapeHtml(
+                verseReference,
+              )}${translation ? ` (${escapeHtml(translation)})` : ""}</div>`
+            : ""
+        }
+        ${
+          verseText
+            ? `<div style="font-size:14px;line-height:1.6;color:#3a332c;">${escapeHtml(
+                verseText,
               )}</div>`
             : ""
         }
