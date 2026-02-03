@@ -8,6 +8,7 @@ type QuietInviteCuration = {
   literature_title?: string | null;
   literature_work?: string | null;
   pairing_date?: string | null;
+  locale?: string | null;
 };
 
 type QuietInvitePairing = {
@@ -59,16 +60,22 @@ export function renderQuietInviteEmail(
     rationale && excerptCandidate?.trim() === rationale.trim()
       ? fallbackExcerpt
       : excerptCandidate ?? "Open the app to read today's curation.";
-  const dateLine = curation.pairing_date
-    ? `For ${new Date(curation.pairing_date).toLocaleDateString()}`
-    : "";
+  const isKo =
+    typeof curation.locale === "string" &&
+    curation.locale.toLowerCase().startsWith("ko");
+  const todayLabel = isKo ? "오늘" : "Today";
+  const headerTagline = isKo
+    ? "하루를 시작하는 고요한 페어링."
+    : "A calm daily pairing to start the day.";
+  const headerDate = formatEmailDate(curation.pairing_date, isKo);
+  const rationaleHeading = isKo ? "연결고리 설명" : "Why this pairing?";
 
   const pairingSection = pairing ? renderPairingSection(pairing) : "";
   const rationaleSection = rationale
     ? `
       <div style="margin-top:18px;border:1px solid #eadfd7;background-color:#fffaf6;border-radius:14px;padding:16px;">
         <div style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#8c7f76;margin-bottom:6px;">
-          Why this pairing?
+          ${escapeHtml(rationaleHeading)}
         </div>
         <div style="font-size:14px;line-height:1.6;color:#3a332c;">
           ${escapeHtml(rationale)}
@@ -88,16 +95,17 @@ export function renderQuietInviteEmail(
   <body style="margin:0;padding:0;background-color:#f7f3ef;font-family:Helvetica,Arial,sans-serif;color:#2d2721;">
     <div style="max-width:640px;margin:0 auto;padding:28px;">
       <p style="margin:0 0 12px 0;font-size:12px;letter-spacing:0.28em;text-transform:uppercase;color:#8c7f76;">
-        Quiet Curation
+        ${escapeHtml(todayLabel)}
       </p>
-      <h1 style="margin:0 0 8px 0;font-size:28px;line-height:1.25;color:#1f1a16;">
-        ${escapeHtml(title)}
+      <h1 style="margin:0 0 6px 0;font-size:28px;line-height:1.25;color:#1f1a16;">
+        Quiet Curation
       </h1>
-      ${
-        dateLine
-          ? `<p style="margin:0 0 16px 0;font-size:14px;color:#8c7f76;">${escapeHtml(dateLine)}</p>`
-          : ""
-      }
+      <p style="margin:0 0 6px 0;font-size:14px;color:#8c7f76;">
+        ${escapeHtml(headerTagline)}
+      </p>
+      <p style="margin:0 0 16px 0;font-size:13px;color:#8c7f76;">
+        ${escapeHtml(headerDate)}
+      </p>
       <p style="margin:0 0 20px 0;font-size:16px;line-height:1.6;color:#3a332c;">
         ${escapeHtml(excerpt)}
       </p>
@@ -143,7 +151,6 @@ function renderPairingSection(pairing: QuietInvitePairing) {
   if (literatureLine || literatureText) {
     blocks.push(`
       <div style="margin-bottom:16px;">
-        <div style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#8c7f76;margin-bottom:6px;">Reading</div>
         ${
           literatureLine
             ? `<div style="font-size:15px;font-weight:600;margin-bottom:6px;color:#1f1a16;">${escapeHtml(
@@ -198,6 +205,16 @@ function renderPairingSection(pairing: QuietInvitePairing) {
       ${blocks.join("")}
     </div>
   `;
+}
+
+function formatEmailDate(dateValue: string | null | undefined, isKo: boolean) {
+  const date = dateValue ? new Date(dateValue) : new Date();
+  const formatter = new Intl.DateTimeFormat(isKo ? "ko-KR" : "en-US", {
+    year: "numeric",
+    month: isKo ? "long" : "short",
+    day: "numeric",
+  });
+  return formatter.format(date);
 }
 
 function firstNonEmpty(...values: Array<string | null | undefined>) {

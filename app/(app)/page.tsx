@@ -46,6 +46,19 @@ const buildAttributionParts = (pairing: TodayPairing) => {
   return { author: author || null, title: title || null, year };
 };
 
+const formatHeaderDate = (dateValue: string | null | undefined, locale: string) => {
+  const date = dateValue ? new Date(dateValue) : new Date();
+  const formatter = new Intl.DateTimeFormat(
+    locale === "ko" ? "ko-KR" : "en-US",
+    {
+      year: "numeric",
+      month: locale === "ko" ? "long" : "short",
+      day: "numeric",
+    },
+  );
+  return formatter.format(date);
+};
+
 const resolveLocale = async () => {
   const headerStore = await headers();
   const acceptLanguage = headerStore.get("accept-language")?.toLowerCase() ?? "";
@@ -60,6 +73,11 @@ export default async function HomePage() {
   const requestId = randomUUID();
   const supabase = await createSupabaseServer();
   const locale = await resolveLocale();
+  const todayLabel = locale === "ko" ? "오늘" : "Today";
+  const tagline =
+    locale === "ko"
+      ? "하루를 시작하는 고요한 페어링."
+      : "A calm daily pairing to start the day.";
   let pairing: TodayPairing | null = null;
   let error: string | null = null;
   let isFallback = false;
@@ -80,11 +98,14 @@ export default async function HomePage() {
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-8">
         <header className="space-y-2">
           <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
-            Today
+            {todayLabel}
           </p>
           <h1 className="text-2xl font-semibold">Quiet Curation</h1>
           <p className="text-sm text-neutral-500">
-            A calm daily pairing to start the day.
+            {tagline}
+          </p>
+          <p className="text-xs text-neutral-500">
+            {formatHeaderDate(null, locale)}
           </p>
         </header>
         <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
@@ -112,6 +133,7 @@ export default async function HomePage() {
   const attribution = pairing ? buildAttributionParts(pairing) : null;
   const ctaHint =
     locale === "ko" ? "연결고리 보려면 클릭" : "Click to see explanations";
+  const headerDate = formatHeaderDate(pairing?.pairing_date, locale);
 
   if (pairing) {
     const missing: string[] = [];
@@ -143,11 +165,14 @@ export default async function HomePage() {
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-8">
       <header className="space-y-2">
         <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">
-          Today
+          {todayLabel}
         </p>
         <h1 className="text-2xl font-semibold">Quiet Curation</h1>
         <p className="text-sm text-neutral-500">
-          A calm daily pairing to start the day.
+          {tagline}
+        </p>
+        <p className="text-xs text-neutral-500">
+          {headerDate}
         </p>
       </header>
 
@@ -167,15 +192,12 @@ export default async function HomePage() {
           className="rounded-2xl border border-neutral-200/80 bg-white p-4 transition hover:border-neutral-300"
         >
           {literatureText ? (
-            <div className="rounded-2xl border border-neutral-200/70 bg-neutral-50/60 p-4">
+            <div className="rounded-2xl border border-[#eadfd7] bg-[#fff7f1] p-4">
               <div className="text-[10px] uppercase tracking-[0.2em] text-neutral-400">
                 Reading
               </div>
-              <p className="text-[17px] leading-relaxed text-neutral-700 whitespace-pre-line break-words">
-                {literatureText}
-              </p>
               {attribution ? (
-                <p className="mt-3 text-xs text-neutral-500 truncate">
+                <p className="mt-2 text-xs text-neutral-500 truncate">
                   &mdash;{" "}
                   {attribution.author ? <span>{attribution.author}</span> : null}
                   {attribution.author && attribution.title ? ", " : null}
@@ -185,9 +207,16 @@ export default async function HomePage() {
                   {attribution.year ? ` (${attribution.year})` : null}
                 </p>
               ) : null}
+              <p
+                className={`text-[17px] leading-relaxed text-neutral-700 whitespace-pre-line break-words ${
+                  attribution ? "mt-3" : "mt-2"
+                }`}
+              >
+                {literatureText}
+              </p>
             </div>
           ) : null}
-          <div className="mt-4 rounded-2xl border border-neutral-200/70 bg-white p-4">
+          <div className="mt-4 rounded-2xl border border-[#eadfd7] bg-[#fff7f1] p-4">
             <div className="text-[10px] uppercase tracking-[0.2em] text-neutral-400">
               Verse
             </div>
@@ -199,7 +228,7 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="mt-4">
-            <div className="button buttonGhost pointer-events-none select-none">
+            <div className="button pointer-events-none select-none border border-[#eadfd7] bg-[#fff7f1] text-[#5a4d45]">
               {ctaHint}
             </div>
           </div>

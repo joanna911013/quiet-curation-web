@@ -13,6 +13,7 @@ type PairingDetail = {
   literature_author: string | null;
   literature_work: string | null;
   literature_title: string | null;
+  locale: string | null;
   explanations: string | null;
   rationale: string | null;
   pub_year: number | null;
@@ -123,6 +124,8 @@ export function DetailView({
   const rationale = pairing.rationale?.trim();
   const explanation = pairing.explanations?.trim();
   const attribution = buildAttributionParts(pairing);
+  const isKo = pairing.locale?.toLowerCase().startsWith("ko");
+  const rationaleHeading = isKo ? "연결고리 설명" : "Why this pairing?";
 
   return (
     <section className="readingContainer">
@@ -186,7 +189,7 @@ export function DetailView({
           {rationale ? (
             <div className="rounded-2xl border border-neutral-200/80 bg-neutral-50 px-4 py-3">
               <p className="text-[13px] font-semibold text-neutral-600">
-                Explanations
+                {rationaleHeading}
               </p>
               <p className="mt-1 text-sm text-neutral-600">
                 {trimText(rationale)}

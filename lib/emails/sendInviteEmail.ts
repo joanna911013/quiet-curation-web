@@ -16,6 +16,7 @@ type QuietInviteCuration = {
   literature_title?: string | null;
   literature_work?: string | null;
   pairing_date?: string | null;
+  locale?: string | null;
 };
 
 type QuietInvitePairing = {
