@@ -45,13 +45,20 @@ export function renderQuietInviteEmail(
       curation.literature_title,
       curation.literature_work,
     ) || "Today's Quiet Curation";
-  const excerpt =
-    firstNonEmpty(
-      curation.excerpt,
-      curation.summary,
-      curation.literature_text,
-    ) || "Open the app to read today's curation.";
   const rationale = firstNonEmpty(curation.rationale);
+  const excerptCandidate = firstNonEmpty(
+    curation.excerpt,
+    curation.summary,
+    curation.literature_text,
+  );
+  const fallbackExcerpt = firstNonEmpty(
+    curation.literature_text,
+    curation.summary,
+  );
+  const excerpt =
+    rationale && excerptCandidate?.trim() === rationale.trim()
+      ? fallbackExcerpt
+      : excerptCandidate ?? "Open the app to read today's curation.";
   const dateLine = curation.pairing_date
     ? `For ${new Date(curation.pairing_date).toLocaleDateString()}`
     : "";
