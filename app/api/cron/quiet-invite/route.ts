@@ -17,6 +17,9 @@ export async function GET(request: Request) {
   const requestId = runId;
   const cronSecret = process.env.CRON_SECRET;
   const authHeader = request.headers.get("authorization");
+  const url = new URL(request.url);
+  const testEmail = url.searchParams.get("test_email");
+  const testLocale = url.searchParams.get("test_locale") ?? DEFAULT_LOCALE;
 
   if (!cronSecret) {
     logWarn("quiet_invite.auth_failed", {
@@ -67,11 +70,14 @@ export async function GET(request: Request) {
   const pairingId = await fetchTodayPairingId(
     supabase,
     deliveryDate,
-    DEFAULT_LOCALE,
+    testEmail ? testLocale : DEFAULT_LOCALE,
   );
   const safePairingId = pairingId
     ? null
-    : await fetchSafeSetPairingId(supabase, DEFAULT_LOCALE);
+    : await fetchSafeSetPairingId(
+        supabase,
+        testEmail ? testLocale : DEFAULT_LOCALE,
+      );
   const curationId = pairingId || safePairingId || fallbackCurationId || "";
 
   if (!curationId) {
@@ -85,6 +91,28 @@ export async function GET(request: Request) {
   }
 
   const inviteContent = await fetchInviteContent(supabase, curationId);
+
+  if (testEmail) {
+    const sendResult = await sendInviteEmail({
+      recipient: { id: "test", email: testEmail },
+      ...inviteContent,
+      siteUrl: normalizedSiteUrl,
+    });
+    if (!sendResult.ok) {
+      return NextResponse.json(
+        { ok: false, error: sendResult.error },
+        { status: 500 },
+      );
+    }
+    return NextResponse.json({
+      ok: true,
+      test_email: testEmail,
+      locale: testLocale,
+      curation_id: curationId,
+      provider: emailProvider,
+      ...(cronDebug && { isDryRun }),
+    });
+  }
 
   const { data: recipients, error: recipientsError } = await supabase
     .from("profiles")
