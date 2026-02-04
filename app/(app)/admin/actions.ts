@@ -381,11 +381,11 @@ async function validatePairing(
     errors.push("Literature source is required.");
   }
 
-  const excerpt = pairing.literature_text?.trim() ?? "";
-  if (!excerpt) {
+  const literatureText = pairing.literature_text?.trim() ?? "";
+  if (!literatureText) {
     errors.push("Literature excerpt is required.");
   } else {
-    const wordCount = countWords(excerpt);
+    const wordCount = countWords(literatureText);
     if (wordCount > MAX_EXCERPT_WORDS) {
       errors.push(`Literature excerpt exceeds ${MAX_EXCERPT_WORDS} words.`);
     }

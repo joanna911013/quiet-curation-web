@@ -185,7 +185,7 @@ export default async function HomePage() {
           className="rounded-2xl border border-neutral-200/80 bg-white p-4 transition hover:border-neutral-300"
         >
           {literatureText ? (
-            <div className="rounded-2xl border border-[#eadfd7] bg-[#fff7f1] p-4">
+            <div className="rounded-2xl border border-neutral-200/70 bg-neutral-50 p-4">
               <div className="text-[10px] uppercase tracking-[0.2em] text-neutral-400">
                 Reading
               </div>
@@ -209,7 +209,7 @@ export default async function HomePage() {
               </p>
             </div>
           ) : null}
-          <div className="mt-4 rounded-2xl border border-[#eadfd7] bg-[#fff7f1] p-4">
+          <div className="mt-4 rounded-2xl border border-neutral-200/70 bg-neutral-50 p-4">
             <div className="text-[10px] uppercase tracking-[0.2em] text-neutral-400">
               Verse
             </div>
@@ -221,7 +221,7 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="mt-4">
-            <div className="button pointer-events-none select-none border border-[#eadfd7] bg-[#fff7f1] text-[#5a4d45]">
+            <div className="button pointer-events-none select-none border border-neutral-200/70 bg-neutral-50 text-neutral-600">
               {ctaHint}
             </div>
           </div>

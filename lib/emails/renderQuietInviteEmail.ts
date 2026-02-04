@@ -72,7 +72,7 @@ export function renderQuietInviteEmail(
   const pairingSection = pairing ? renderPairingSection(pairing) : "";
   const rationaleSection = rationale
     ? `
-      <div style="margin-top:18px;border:1px solid #eadfd7;background-color:#fffaf6;border-radius:14px;padding:16px;">
+      <div style="margin-top:18px;border:1px solid #e1e1e1;background-color:#f5f5f5;border-radius:14px;padding:16px;">
         <div style="font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:#8c7f76;margin-bottom:6px;">
           ${escapeHtml(rationaleHeading)}
         </div>
@@ -101,9 +101,6 @@ export function renderQuietInviteEmail(
       </p>
       <p style="margin:0 0 16px 0;font-size:13px;color:#8c7f76;">
         ${escapeHtml(headerDate)}
-      </p>
-      <p style="margin:0 0 20px 0;font-size:16px;line-height:1.6;color:#3a332c;">
-        ${escapeHtml(excerpt)}
       </p>
       ${pairingSection}
       ${rationaleSection}
@@ -194,7 +191,7 @@ function renderPairingSection(pairing: QuietInvitePairing) {
   }
 
   return `
-    <div style="margin-top:12px;border:1px solid #eadfd7;background-color:#fff7f1;border-radius:16px;padding:18px;">
+    <div style="margin-top:12px;border:1px solid #e1e1e1;background-color:#f5f5f5;border-radius:16px;padding:18px;">
       <h2 style="margin:0 0 12px 0;font-size:16px;letter-spacing:0.08em;text-transform:uppercase;color:#5a4d45;">
         Pairing
       </h2>
