@@ -221,8 +221,11 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="mt-4">
-            <div className="button pointer-events-none select-none border border-neutral-200/70 bg-neutral-50 text-neutral-600">
-              {ctaHint}
+            <div className="border-t border-neutral-200/70 pt-3">
+              <div className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-800">
+                <span>{ctaHint}</span>
+                <span aria-hidden="true">›</span>
+              </div>
             </div>
           </div>
         </Link>
