@@ -31,6 +31,10 @@ if (!siteUrl) {
 
 const normalizedSiteUrl = siteUrl.replace(/\/$/, "");
 const deliveryDate = getSeoulDateString();
+if (isSeoulWeekend()) {
+  console.log("Weekend in Asia/Seoul. Skipping invite generation.");
+  process.exit(0);
+}
 
 const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: { persistSession: false },
@@ -161,6 +165,15 @@ function getSeoulDateString() {
     day: "2-digit",
   });
   return formatter.format(new Date());
+}
+
+function isSeoulWeekend() {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    weekday: "short",
+  });
+  const day = formatter.format(new Date());
+  return day === "Sat" || day === "Sun";
 }
 
 function parseArgs(argv) {

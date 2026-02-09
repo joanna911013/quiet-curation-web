@@ -62,6 +62,19 @@ export async function GET(request: Request) {
 
   const normalizedSiteUrl = siteUrl.replace(/\/$/, "");
   const deliveryDate = getSeoulDateString();
+  const weekendSeoul = isSeoulWeekend();
+  if (weekendSeoul && !testEmail) {
+    logInfo("quiet_invite.weekend_skip", {
+      request_id: requestId,
+      run_id: runId,
+      route: "cron/quiet-invite",
+      delivery_date: deliveryDate,
+    });
+    return NextResponse.json(
+      { ok: true, skipped: "weekend", delivery_date: deliveryDate },
+      { status: 200 },
+    );
+  }
   const supabase = createClient(supabaseUrl, supabaseKey, {
     auth: { persistSession: false },
   });
@@ -424,6 +437,15 @@ function getSeoulDateString() {
     day: "2-digit",
   });
   return formatter.format(new Date());
+}
+
+function isSeoulWeekend() {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    weekday: "short",
+  });
+  const day = formatter.format(new Date());
+  return day === "Sat" || day === "Sun";
 }
 
 type QuietInviteContent = Omit<
