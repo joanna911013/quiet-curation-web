@@ -21,23 +21,25 @@ type MarketingCtaLinkProps = {
   href: string;
   event: MarketingEvent;
   children: ReactNode;
+  className?: string;
 };
 
 export function MarketingCtaLink({
   href,
   event,
   children,
+  className,
 }: MarketingCtaLinkProps) {
-  const className = useMemo(
+  const baseClassName = useMemo(
     () =>
-      "inline-flex w-fit items-center rounded-full bg-neutral-900 px-5 py-2 text-sm font-medium text-white",
+      "inline-flex w-fit items-center rounded-[20px] bg-[var(--md-sys-color-primary)] px-6 py-3 text-sm font-medium text-[var(--md-sys-color-on-primary)] min-h-[44px] transition hover:brightness-95",
     [],
   );
 
   return (
     <Link
       href={href}
-      className={className}
+      className={`${baseClassName} ${className ?? ""}`.trim()}
       onClick={() => trackEvent(event)}
     >
       {children}
