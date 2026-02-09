@@ -34,7 +34,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   } = await supabase.auth.getUser();
 
   if (userError || !user) {
-    redirect("/login?redirect=/admin");
+    redirect("/?redirect=/admin");
   }
 
   const { data: profile, error: profileError } = await supabase

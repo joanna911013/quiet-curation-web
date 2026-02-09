@@ -53,7 +53,7 @@ export default async function DetailPage({ params }: PageProps) {
       <main className="mx-auto w-full max-w-xl px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-8">
         <p className="text-sm text-neutral-500">Reading not found.</p>
         <Link
-          href="/"
+          href="/today"
           className="mt-4 inline-flex text-xs text-neutral-500 underline"
         >
           Back to Home
@@ -67,7 +67,7 @@ export default async function DetailPage({ params }: PageProps) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect(`/?redirect=/c/${pairingId}`);
   }
 
   const { data: pairing, error: pairingError } = await supabase
@@ -86,7 +86,7 @@ export default async function DetailPage({ params }: PageProps) {
         <p className="text-sm text-neutral-500">Unable to load reading.</p>
         <RetryButton className="mt-4" />
         <Link
-          href="/"
+          href="/today"
           className="mt-4 inline-flex text-xs text-neutral-500 underline"
         >
           Back to Home
@@ -99,7 +99,7 @@ export default async function DetailPage({ params }: PageProps) {
     return (
       <main className="mx-auto w-full max-w-xl px-5 pb-[calc(16px+env(safe-area-inset-bottom))] pt-8">
         <p className="text-sm text-neutral-500">Reading not found.</p>
-        <Link href="/" className="mt-4 inline-flex text-xs text-neutral-500 underline">
+        <Link href="/today" className="mt-4 inline-flex text-xs text-neutral-500 underline">
           Back to Home
         </Link>
       </main>

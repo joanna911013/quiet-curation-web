@@ -24,7 +24,7 @@ export function LogoutButton() {
         setIsLoading(false);
         return;
       }
-      router.replace("/login");
+      router.replace("/");
       router.refresh();
     } catch (caughtError) {
       console.error("Logout failed.", caughtError);

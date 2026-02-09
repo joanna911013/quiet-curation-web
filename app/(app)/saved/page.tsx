@@ -77,7 +77,7 @@ export default async function SavedPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/?redirect=/saved");
   }
 
   const { data: savedRows, error: savedError } = await supabase
@@ -225,7 +225,7 @@ export default async function SavedPage() {
               Open a pairing and tap Save.
             </p>
             <Link
-              href="/"
+              href="/today"
               className="button buttonPrimary mt-4 inline-flex items-center justify-center"
             >
               Go to Today

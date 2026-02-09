@@ -27,14 +27,14 @@ export async function GET(request: Request) {
       params.set("error", errorParam);
     }
     appendRedirectParam(params, safeRedirect);
-    return NextResponse.redirect(`${origin}/login?${params.toString()}`);
+    return NextResponse.redirect(`${origin}/?${params.toString()}`);
   }
 
   if (!code && !(tokenHash && otpType)) {
     const params = new URLSearchParams();
     params.set("error", "missing_code");
     appendRedirectParam(params, safeRedirect);
-    return NextResponse.redirect(`${origin}/login?${params.toString()}`);
+    return NextResponse.redirect(`${origin}/?${params.toString()}`);
   }
 
   const response = NextResponse.redirect(`${origin}${safeRedirect}`);
@@ -112,30 +112,34 @@ export async function GET(request: Request) {
       params.set("error_description", authError.message);
     }
     appendRedirectParam(params, safeRedirect);
-    return NextResponse.redirect(`${origin}/login?${params.toString()}`);
+    return NextResponse.redirect(`${origin}/?${params.toString()}`);
   }
 
   return response;
 }
 
 function sanitizeRedirect(value: string | null) {
+  const fallback = "/today";
   if (!value) {
-    return "/";
+    return fallback;
   }
   if (!value.startsWith("/")) {
-    return "/";
+    return fallback;
   }
   if (value.startsWith("//")) {
-    return "/";
+    return fallback;
   }
   if (value.toLowerCase().includes("http")) {
-    return "/";
+    return fallback;
+  }
+  if (value === "/") {
+    return fallback;
   }
   return value;
 }
 
 function appendRedirectParam(params: URLSearchParams, redirectPath: string) {
-  if (redirectPath && redirectPath !== "/") {
+  if (redirectPath && redirectPath !== "/today") {
     params.set("redirect", redirectPath);
   }
 }

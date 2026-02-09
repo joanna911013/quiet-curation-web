@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const navItems = [
-  { href: "/", label: "Home" },
+  { href: "/today", label: "Home" },
   { href: "/saved", label: "Saved" },
   { href: "/profile", label: "Profile" },
 ];
@@ -11,7 +11,7 @@ export function AppHeader() {
     <header className="border-b border-neutral-200/70">
       <div className="mx-auto flex w-full max-w-xl items-center justify-between px-5 py-4">
         <Link
-          href="/"
+          href="/today"
           className="text-xs uppercase tracking-[0.2em] text-neutral-500"
         >
           Quiet Curation

@@ -39,7 +39,7 @@ export default async function PairingsAdminPage({
   } = await supabase.auth.getUser();
 
   if (userError || !user) {
-    redirect("/login?redirect=/admin/pairings");
+    redirect("/?redirect=/admin/pairings");
   }
 
   const { data: profile } = await supabase

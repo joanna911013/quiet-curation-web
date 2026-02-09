@@ -29,7 +29,7 @@ export default async function PairingDetailPage({ params }: PageProps) {
   } = await supabase.auth.getUser();
 
   if (userError || !user) {
-    redirect("/login?redirect=/admin");
+    redirect("/?redirect=/admin");
   }
 
   const { data: profile } = await supabase

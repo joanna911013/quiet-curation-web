@@ -110,7 +110,7 @@ for (const recipient of recipients) {
   }
 
   insertedCount += 1;
-  const inviteLink = `${normalizedSiteUrl}/login?redirect=${encodeURIComponent(
+  const inviteLink = `${normalizedSiteUrl}/?redirect=${encodeURIComponent(
     `/c/${curationId}`,
   )}`;
   console.log(`Invite for ${recipient.id}: ${inviteLink}`);

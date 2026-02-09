@@ -39,7 +39,7 @@ export default function DonePage() {
         </p>
       </header>
 
-      <Button onClick={() => router.push("/")}>Done</Button>
+      <Button onClick={() => router.push("/today")}>Done</Button>
     </main>
   );
 }

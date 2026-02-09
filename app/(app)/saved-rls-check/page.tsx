@@ -6,7 +6,7 @@ export default async function SavedRlsCheckPage() {
   const supabase = await createSupabaseServer();
   const { data: { user }, error } = await supabase.auth.getUser();
 
-  if (error || !user) redirect("/login");
+  if (error || !user) redirect("/?redirect=/saved");
 
   return (
     <main style={{ padding: 16, maxWidth: 720 }}>

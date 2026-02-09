@@ -39,7 +39,7 @@ export function renderQuietInviteEmail(
 ): RenderQuietInviteEmailOutput {
   const { curation, pairing, siteUrl } = input;
   const normalizedSiteUrl = siteUrl.replace(/\/$/, "");
-  const deepLink = `${normalizedSiteUrl}/login?redirect=/c/${curation.id}`;
+  const deepLink = `${normalizedSiteUrl}/?redirect=/c/${curation.id}`;
   const title =
     firstNonEmpty(
       curation.title,

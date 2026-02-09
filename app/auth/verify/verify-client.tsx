@@ -26,10 +26,10 @@ export default function VerifyClient() {
       if (error.message) {
         params.set("error_description", error.message);
       }
-      if (safeRedirect !== "/") {
+      if (safeRedirect !== "/today") {
         params.set("redirect", safeRedirect);
       }
-      router.replace(`/login?${params.toString()}`);
+      router.replace(`/?${params.toString()}`);
     };
 
     const verify = async () => {
@@ -119,17 +119,21 @@ export default function VerifyClient() {
 }
 
 function sanitizeRedirect(value: string | null) {
+  const fallback = "/today";
   if (!value) {
-    return "/";
+    return fallback;
   }
   if (!value.startsWith("/")) {
-    return "/";
+    return fallback;
   }
   if (value.startsWith("//")) {
-    return "/";
+    return fallback;
   }
   if (value.toLowerCase().includes("http")) {
-    return "/";
+    return fallback;
+  }
+  if (value === "/") {
+    return fallback;
   }
   return value;
 }

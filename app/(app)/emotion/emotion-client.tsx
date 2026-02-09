@@ -65,7 +65,7 @@ export function EmotionPageClient({
         <p className="text-sm text-neutral-500">
           Emotion logging is currently disabled.
         </p>
-        <Button className="mt-4" onClick={() => router.push("/")}>
+        <Button className="mt-4" onClick={() => router.push("/today")}>
           Back to Today
         </Button>
       </main>
@@ -135,7 +135,7 @@ export function EmotionPageClient({
         <Button onClick={handleSave} disabled={!selectedId || isSaving}>
           {isSaving ? "Saving..." : "Save"}
         </Button>
-        <Button variant="ghost" onClick={() => router.push("/")}>
+        <Button variant="ghost" onClick={() => router.push("/today")}>
           Skip for now
         </Button>
       </div>
