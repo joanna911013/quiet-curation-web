@@ -99,6 +99,74 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <section id="insights" className="space-y-6">
+          <div className="flex flex-col gap-2">
+            <p className="text-xs uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
+              Insights
+            </p>
+            <h2 className="text-2xl font-semibold">A short reset loop.</h2>
+            <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] max-w-[38ch]">
+              Placeholder section for the attention‑loop framework.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {[
+              "Screen loop → overstimulation",
+              "Quiet reset → 3 minutes",
+              "Return with a clearer mind",
+            ].map((text) => (
+              <div
+                key={text}
+                className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container)] p-5 text-sm text-[var(--md-sys-color-on-surface-variant)]"
+              >
+                {text}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="principles" className="space-y-6">
+          <div className="flex flex-col gap-2">
+            <p className="text-xs uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
+              Principles
+            </p>
+            <h2 className="text-2xl font-semibold">What we will and won’t do.</h2>
+            <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] max-w-[38ch]">
+              Placeholder cards for the product principles.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {["One pairing", "No feed", "No noise"].map((text) => (
+              <div
+                key={text}
+                className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container)] p-5 text-sm text-[var(--md-sys-color-on-surface-variant)]"
+              >
+                {text}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="for-not-for" className="space-y-6">
+          <div className="flex flex-col gap-2">
+            <p className="text-xs uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
+              For / Not for
+            </p>
+            <h2 className="text-2xl font-semibold">A clear fit.</h2>
+            <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] max-w-[38ch]">
+              Placeholder list for who this is for, and who it isn’t.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container)] p-5 text-sm text-[var(--md-sys-color-on-surface-variant)]">
+              For: people who want a small daily ritual.
+            </div>
+            <div className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container)] p-5 text-sm text-[var(--md-sys-color-on-surface-variant)]">
+              Not for: people who want constant updates.
+            </div>
+          </div>
+        </section>
+
         <section id="sample" className="space-y-6">
           <div className="flex flex-col gap-2">
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
