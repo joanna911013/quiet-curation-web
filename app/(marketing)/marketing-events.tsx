@@ -32,7 +32,7 @@ export function MarketingCtaLink({
 }: MarketingCtaLinkProps) {
   const baseClassName = useMemo(
     () =>
-      "inline-flex w-fit items-center rounded-[20px] bg-[var(--md-sys-color-primary)] px-6 py-3 text-sm font-medium text-[var(--md-sys-color-on-primary)] min-h-[44px] transition hover:brightness-95",
+      "inline-flex w-fit items-center rounded-[20px] bg-[var(--md-sys-color-primary)] px-6 py-3 text-sm font-medium text-[var(--md-sys-color-on-primary)] min-h-[44px] shadow-[0_2px_6px_rgba(0,0,0,0.18)] transition hover:brightness-95 hover:shadow-[0_6px_16px_rgba(0,0,0,0.2)]",
     [],
   );
 

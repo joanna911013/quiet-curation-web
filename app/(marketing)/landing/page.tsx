@@ -21,6 +21,9 @@ export default function LandingPage() {
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-20 px-6 pb-20 pt-8 sm:pt-12 lg:pt-14">
         <section className="grid gap-8 sm:gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div className="space-y-5 sm:space-y-6">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-high)] px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-[var(--md-sys-color-on-surface-variant)]">
+              3-minute reset
+            </div>
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
               Quiet Curation
             </p>
@@ -50,7 +53,7 @@ export default function LandingPage() {
               Daily at 09:00 KST. Unsubscribe anytime.
             </p>
           </div>
-          <div className="w-full max-w-md justify-self-center rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container)] p-6 shadow-[0_16px_40px_rgba(0,0,0,0.12)] animate-[float_8s_ease-in-out_infinite] lg:justify-self-end">
+          <div className="w-full max-w-md justify-self-center rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container)] p-6 shadow-[0_12px_32px_rgba(0,0,0,0.12)] animate-[float_8s_ease-in-out_infinite] lg:justify-self-end">
             <div className="text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
               Screen loop
             </div>
