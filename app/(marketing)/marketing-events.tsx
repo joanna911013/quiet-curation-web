@@ -46,3 +46,27 @@ export function MarketingCtaLink({
     </Link>
   );
 }
+
+type MarketingTextLinkProps = {
+  href: string;
+  event: MarketingEvent;
+  children: ReactNode;
+  className?: string;
+};
+
+export function MarketingTextLink({
+  href,
+  event,
+  children,
+  className,
+}: MarketingTextLinkProps) {
+  return (
+    <Link
+      href={href}
+      className={className}
+      onClick={() => trackEvent(event)}
+    >
+      {children}
+    </Link>
+  );
+}

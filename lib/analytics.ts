@@ -1,4 +1,9 @@
-export type MarketingEvent = "lp_view" | "lp_cta_click" | "sub_view";
+export type MarketingEvent =
+  | "lp_view"
+  | "lp_cta_click"
+  | "sub_view"
+  | "lp_cta_subscribe_click"
+  | "lp_cta_secondary_click";
 
 export function trackEvent(event: MarketingEvent) {
   if (typeof window === "undefined") {

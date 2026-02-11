@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { MarketingCtaLink, MarketingViewEvent } from "../marketing-events";
+import { MarketingCtaLink, MarketingTextLink, MarketingViewEvent } from "../marketing-events";
 
 export const metadata: Metadata = {
   title: "Quiet Curation — Landing",
@@ -19,38 +18,39 @@ export default function LandingPage() {
       <div className="pointer-events-none absolute left-1/2 top-[-240px] h-[420px] w-[520px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,_rgba(11,107,90,0.14),_rgba(11,107,90,0)_70%)] blur-2xl opacity-60" />
       <div className="pointer-events-none absolute right-[-140px] top-[120px] h-[360px] w-[360px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(74,99,93,0.12),_rgba(74,99,93,0)_70%)] blur-2xl opacity-70" />
 
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-20 px-6 pb-20 pt-10 sm:pt-14">
-        <section className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-          <div className="space-y-6">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-20 px-6 pb-20 pt-8 sm:pt-12 lg:pt-14">
+        <section className="grid gap-8 sm:gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <div className="space-y-5 sm:space-y-6">
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
               Quiet Curation
             </p>
-            <h1 className="text-4xl font-semibold leading-tight sm:text-5xl sm:leading-tight max-w-[20ch] animate-[fadeUp_0.8s_ease-out]">
+            <h1 className="text-[clamp(2.25rem,4.8vw,3.5rem)] font-semibold leading-[1.08] max-w-[20ch] animate-[fadeUp_0.8s_ease-out]">
               Break the screen‑loop in 3 minutes.
             </h1>
             <p className="text-base text-[var(--md-sys-color-on-surface-variant)] max-w-[38ch]">
               One literature × verse pairing, delivered by email. No feed. No
               noise.
             </p>
-            <p className="text-xs uppercase tracking-[0.18em] text-[var(--md-sys-color-on-surface-variant)]">
-              screen‑loop → 3‑minute dopamine detox → quiet invite (email)
-            </p>
-            <div className="flex flex-wrap items-center gap-4">
-              <MarketingCtaLink href="/subscribe" event="lp_cta_click">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <MarketingCtaLink href="/subscribe" event="lp_cta_subscribe_click">
                 Join the quiet invite
               </MarketingCtaLink>
-              <Link
+              <MarketingTextLink
                 href="#sample"
+                event="lp_cta_secondary_click"
                 className="text-sm text-[var(--md-sys-color-secondary)] underline underline-offset-4 hover:text-[var(--md-sys-color-on-surface)]"
               >
                 See a sample pairing
-              </Link>
+              </MarketingTextLink>
             </div>
+            <p className="text-xs uppercase tracking-[0.18em] text-[var(--md-sys-color-on-surface-variant)]">
+              screen‑loop → 3‑minute dopamine detox → quiet invite (email)
+            </p>
             <p className="text-xs text-[var(--md-sys-color-on-surface-variant)]">
               Daily at 09:00 KST. Unsubscribe anytime.
             </p>
           </div>
-          <div className="rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container)] p-6 shadow-[0_16px_40px_rgba(0,0,0,0.12)] animate-[float_8s_ease-in-out_infinite]">
+          <div className="w-full max-w-md justify-self-center rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container)] p-6 shadow-[0_16px_40px_rgba(0,0,0,0.12)] animate-[float_8s_ease-in-out_infinite] lg:justify-self-end">
             <div className="text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
               Screen loop
             </div>
@@ -272,7 +272,7 @@ export default function LandingPage() {
             One calm pairing each morning. That’s all.
           </p>
           <div className="mt-6 flex justify-center">
-            <MarketingCtaLink href="/subscribe" event="lp_cta_click">
+            <MarketingCtaLink href="/subscribe" event="lp_cta_subscribe_click">
               Join the quiet invite
             </MarketingCtaLink>
           </div>
