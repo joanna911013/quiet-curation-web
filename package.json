@@ -10,6 +10,7 @@
     "send:quiet-invites": "node scripts/send-quiet-invites.mjs"
   },
   "dependencies": {
+    "@material/web": "^2.4.1",
     "@supabase/ssr": "^0.8.0",
     "next": "16.1.1",
     "next-intl": "^4.7.0",
