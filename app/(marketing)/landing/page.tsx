@@ -148,21 +148,25 @@ export default function LandingPage() {
                   minute: "01",
                   title: "Quiet",
                   body: "Start your day with a few moments to quiet your spirit.",
+                  color: "rgba(244,224,232,0.9)",
                 },
                 {
                   minute: "02",
                   title: "Read",
                   body: "Read one short literature X verse pairing.",
+                  color: "rgba(226,236,247,0.9)",
                 },
                 {
                   minute: "03",
                   title: "Reflection",
                   body: "Record your emotion and thoughts.",
+                  color: "rgba(218,232,225,0.78)",
                 },
               ].map((item) => (
                 <div
                   key={item.minute}
-                  className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-high)] p-4"
+                  className="rounded-2xl border border-[color:var(--md-sys-color-outline)] p-4"
+                  style={{ backgroundColor: item.color }}
                 >
                   <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
                     Minute {item.minute}
@@ -184,9 +188,9 @@ export default function LandingPage() {
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
               How it works
             </p>
-            <h2 className="text-2xl font-semibold">MVP flow in 3 steps.</h2>
+            <h2 className="text-2xl font-semibold">Steps in flow</h2>
             <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] max-w-[38ch]">
-              This is the core product flow for the current MVP.
+              Simple steps to start your day with quiet ritual
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
@@ -229,6 +233,16 @@ export default function LandingPage() {
                 <p className="mt-1 text-sm text-[var(--md-sys-color-on-surface-variant)]">
                   {item.text}
                 </p>
+                {item.minute === "Step 1" ? (
+                  <div className="mt-4">
+                    <MarketingCtaLink
+                      href="/subscribe"
+                      event="lp_cta_subscribe_click"
+                    >
+                      Join the quiet invite
+                    </MarketingCtaLink>
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
@@ -301,45 +315,55 @@ export default function LandingPage() {
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
               Emotion record
             </p>
-            <h2 className="text-2xl font-semibold">End with one honest check-in.</h2>
+            <h2 className="text-2xl font-semibold">End with one honest check-in—record it.</h2>
             <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] max-w-[38ch]">
-              After the daily pairing, record your emotion in one word and add a short note if needed.
+              A simple preview of how the emotion step works in the app.
             </p>
           </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {[
-              {
-                title: "Pick one emotion",
-                text: "Choose one word that best matches your current mood.",
-                tone: "bg-[rgba(247,238,224,0.88)]",
-              },
-              {
-                title: "Optional memo",
-                text: "Add a short reflection for context (up to 160 characters).",
-                tone: "bg-[rgba(244,224,232,0.86)]",
-              },
-              {
-                title: "Logged for today",
-                text: "Your daily check-in is saved and shown as completed for today.",
-                tone: "bg-[rgba(226,236,247,0.9)]",
-              },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className={`rounded-2xl border border-[color:var(--md-sys-color-outline)] p-5 text-sm text-[var(--md-sys-color-on-surface-variant)] ${item.tone}`}
-              >
-                <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
-                  {item.title}
-                </p>
-                <p className="mt-2">
-                  {item.text}
-                </p>
+          <div className="relative overflow-hidden rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[linear-gradient(160deg,rgba(247,238,224,0.72),rgba(226,236,247,0.6))] p-6">
+            <div className="pointer-events-none absolute left-4 top-4 h-6 w-6 border-l-2 border-t-2 border-[rgba(186,151,95,0.75)]" />
+            <div className="pointer-events-none absolute bottom-4 right-4 h-6 w-6 border-b-2 border-r-2 border-[rgba(186,151,95,0.75)]" />
+            <div className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface)] p-5">
+              <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
+                Emotion example
+              </p>
+              <p className="mt-2 text-base text-[var(--md-sys-color-on-surface)]">
+                How do you feel today?
+              </p>
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
+                <div className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[rgba(247,238,224,0.72)] p-4">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
+                    Emotion selection
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {["Peaceful", "Grateful", "Anxious", "Hopeful"].map((emotion, index) => (
+                      <span
+                        key={emotion}
+                        className={`inline-flex min-h-[30px] items-center rounded-full border px-3 text-xs ${
+                          index === 0
+                            ? "border-[color:var(--md-sys-color-outline)] bg-[rgba(218,232,225,0.9)] text-[var(--md-sys-color-on-surface)]"
+                            : "border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface-variant)]"
+                        }`}
+                      >
+                        {emotion}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[rgba(244,224,232,0.78)] p-4">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
+                    Optional memo
+                  </p>
+                  <div className="mt-3 rounded-xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface)] px-3 py-2 text-sm text-[var(--md-sys-color-on-surface-variant)]">
+                    Today I want to carry calm into my next conversation.
+                  </div>
+                  <p className="mt-2 text-[11px] text-[var(--md-sys-color-on-surface-variant)]">
+                    Up to 160 characters.
+                  </p>
+                </div>
               </div>
-            ))}
+            </div>
           </div>
-          <p className="text-xs text-[var(--md-sys-color-on-surface-variant)]">
-            No pressure. You can skip any day and return when you&apos;re ready.
-          </p>
         </section>
 
         <section id="faq" className="space-y-6">
