@@ -310,6 +310,9 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+          <p className="text-xs text-[var(--md-sys-color-on-surface-variant)]">
+            Need help? Reply to any invite email and we&apos;ll support you.
+          </p>
         </section>
 
         <section id="faq" className="space-y-6">
@@ -319,7 +322,7 @@ export default function LandingPage() {
             </p>
             <h2 className="text-2xl font-semibold">Common questions.</h2>
           </div>
-          <div className="grid gap-4">
+          <div className="grid gap-3">
             {[
               {
                 q: "Is this a newsletter?",
@@ -346,17 +349,25 @@ export default function LandingPage() {
                 a: "No tracking beyond basic email delivery.",
               },
             ].map((item) => (
-              <div
+              <details
                 key={item.q}
-                className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container)] p-5"
+                className="group rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container)] open:bg-[var(--md-sys-color-surface-container-high)]"
               >
-                <p className="text-sm font-semibold text-[var(--md-sys-color-on-surface)]">
-                  {item.q}
-                </p>
-                <p className="mt-2 text-sm text-[var(--md-sys-color-on-surface-variant)] max-w-[38ch]">
-                  {item.a}
-                </p>
-              </div>
+                <summary className="flex cursor-pointer list-none items-start justify-between gap-4 p-5 text-sm font-semibold text-[var(--md-sys-color-on-surface)] [&::-webkit-details-marker]:hidden">
+                  <span>{item.q}</span>
+                  <span
+                    aria-hidden
+                    className="mt-0.5 text-lg leading-none text-[var(--md-sys-color-on-surface-variant)] transition-transform duration-200 group-open:rotate-45"
+                  >
+                    +
+                  </span>
+                </summary>
+                <div className="px-5 pb-5">
+                  <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] max-w-[38ch]">
+                    {item.a}
+                  </p>
+                </div>
+              </details>
             ))}
           </div>
         </section>
@@ -372,6 +383,9 @@ export default function LandingPage() {
           </h2>
           <p className="mt-2 text-sm text-[var(--md-sys-color-on-surface-variant)] max-w-[38ch] mx-auto">
             One calm pairing each morning, delivered by email.
+          </p>
+          <p className="mt-3 text-xs text-[var(--md-sys-color-on-surface-variant)]">
+            No spam. Unsubscribe anytime. Privacy-first delivery.
           </p>
           <div className="mt-6 flex justify-center">
             <MarketingCtaLink href="/subscribe" event="lp_cta_subscribe_click">
