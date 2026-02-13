@@ -188,7 +188,7 @@ export default function LandingPage() {
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
               How it works
             </p>
-            <h2 className="text-2xl font-semibold">Steps in flow</h2>
+            <h2 className="text-2xl font-semibold">Start to subscribe as a newsletter first</h2>
             <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] max-w-[38ch]">
               Simple steps to start your day with quiet ritual
             </p>
@@ -196,19 +196,19 @@ export default function LandingPage() {
           <div className="grid gap-4 md:grid-cols-3">
             {[
               {
-                minute: "Step 1",
+                minute: "1",
                 title: "Subscribe",
                 text: "Join with your email in one step.",
                 tone: "outlined",
               },
               {
-                minute: "Step 2",
+                minute: "2",
                 title: "Receive",
                 text: "Get one curated pairing each weekday.",
                 tone: "filled",
               },
               {
-                minute: "Step 3",
+                minute: "3",
                 title: "Reflect",
                 text: "Read and record your reflection.",
                 tone: "elevated",
@@ -233,7 +233,7 @@ export default function LandingPage() {
                 <p className="mt-1 text-sm text-[var(--md-sys-color-on-surface-variant)]">
                   {item.text}
                 </p>
-                {item.minute === "Step 1" ? (
+                {item.minute === "1" ? (
                   <div className="mt-4">
                     <MarketingCtaLink
                       href="/subscribe"
@@ -246,9 +246,6 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          <p className="text-xs text-[var(--md-sys-color-on-surface-variant)]">
-            Total time: about three minutes end-to-end.
-          </p>
         </section>
 
         <section id="sample" className="space-y-6">
@@ -341,13 +338,16 @@ export default function LandingPage() {
                         key={emotion}
                         className={`inline-flex min-h-[30px] items-center rounded-full border px-3 text-xs ${
                           index === 0
-                            ? "border-[color:var(--md-sys-color-outline)] bg-[rgba(218,232,225,0.9)] text-[var(--md-sys-color-on-surface)]"
+                            ? "border-[color:var(--md-sys-color-primary)] bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-semibold shadow-[0_0_0_2px_rgba(52,99,255,0.22)]"
                             : "border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface-variant)]"
                         }`}
                       >
                         {emotion}
                       </span>
                     ))}
+                    <span className="inline-flex min-h-[30px] items-center rounded-full border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-high)] px-3 text-xs text-[var(--md-sys-color-on-surface-variant)]">
+                      ...
+                    </span>
                   </div>
                 </div>
                 <div className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[rgba(244,224,232,0.78)] p-4">
