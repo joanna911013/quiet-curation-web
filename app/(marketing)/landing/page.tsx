@@ -12,6 +12,22 @@ export const metadata: Metadata = {
   },
 };
 
+const samplePairing = {
+  id: "24a4a110-66d5-4785-afba-30dbc0dd7fa3",
+  literatureAuthor: "F. Scott Fitzgerald",
+  literatureTitle: "The Great Gatsby",
+  pubYear: "1917",
+  literatureText:
+    "“Your wife doesn’t love you,” said Gatsby. “She’s never loved you. She loves me.”\n“She only married you because I was poor and she was tired of waiting for me.”\n“I did love him once—but I loved you too.”",
+  verseReference: "Romans 5:8 (NIV)",
+  verseText:
+    "But God demonstrates his own love for us in this: While we were still sinners, Christ died for us.",
+  rationale:
+    "Why is he great? Nick says Gatsby had “an extraordinary gift for hope, a romantic readiness. But Gatsby also exposes a harder question: Was Daisy worth that kind of love? And maybe “worthiness” is not decided by the beloved, but by the one who loves. God’s love, though, is not a fantasy we maintain. It’s not based on our performance or value. It’s a love proven by an event—the Cross—given while we were still sinners.  In a strangely human way, Gatsby resembles something biblical: love that keeps moving toward someone—except his love is pointed at a person who cannot save him.",
+  explanations:
+    "Most of us have heard of The Great Gatsby: a man who lived inside a dream of loving Daisy—and was willing to be ruined by it.\nGatsby reunites with Daisy through Nick (her cousin), brings her to his mansion, and shows her the wealth he built as if it could finally “prove” the past was worth waiting for. Daisy is dazzled. She hooks her arm into his, and for a moment it looks like the dream is real.",
+} as const;
+
 export default function LandingPage() {
   return (
     <main className="relative overflow-hidden">
@@ -228,7 +244,7 @@ export default function LandingPage() {
             </p>
             <h2 className="text-2xl font-semibold">What a pairing feels like.</h2>
             <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] max-w-[38ch]">
-              One short passage, one verse, one meaningful connection.
+              We curate pairings of iconic literary lines with related Bible verses.
             </p>
           </div>
           <div className="relative overflow-hidden rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[linear-gradient(160deg,rgba(247,238,224,0.72),rgba(226,236,247,0.6))] p-6">
@@ -236,10 +252,7 @@ export default function LandingPage() {
             <div className="pointer-events-none absolute bottom-4 right-4 h-6 w-6 border-b-2 border-r-2 border-[rgba(186,151,95,0.75)]" />
             <div className="pointer-events-none absolute right-10 top-10 h-10 w-10 bg-[radial-gradient(rgba(198,160,102,0.55)_1.2px,transparent_1.2px)] [background-size:10px_10px] opacity-55" />
             <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
-              <span>Sample issue</span>
-              <span className="rounded-full border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-high)] px-2 py-0.5 text-[10px]">
-                09:00 KST
-              </span>
+              <span>Sample</span>
             </div>
             <div className="mt-4 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
               <div className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface)] p-5">
@@ -247,17 +260,21 @@ export default function LandingPage() {
                   Reading
                 </div>
                 <p className="mt-2 text-sm text-[var(--md-sys-color-on-surface-variant)]">
-                  William Shakespeare, <em>Henry VI</em> (3 Henry VI 3.1.62-65)
+                  {samplePairing.literatureAuthor}, <em>{samplePairing.literatureTitle}</em>{" "}
+                  ({samplePairing.pubYear})
                 </p>
-                <p className="mt-3 text-base text-[var(--md-sys-color-on-surface)] max-w-[38ch]">
-                  "My crown is called content: A crown it is that seldom kings enjoy."
+                <p className="mt-3 whitespace-pre-line text-base text-[var(--md-sys-color-on-surface)]">
+                  {samplePairing.literatureText}
                 </p>
                 <div className="mt-5 rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface)] p-4">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
                     Verse
                   </p>
-                  <p className="mt-2 text-sm text-[var(--md-sys-color-on-surface)] max-w-[38ch]">
-                    "Be still, and know that I am God." (Psalm 46:10)
+                  <p className="mt-2 text-sm text-[var(--md-sys-color-on-surface)]">
+                    {samplePairing.verseReference}
+                  </p>
+                  <p className="mt-2 whitespace-pre-line text-sm text-[var(--md-sys-color-on-surface)]">
+                    {samplePairing.verseText}
                   </p>
                 </div>
               </div>
@@ -265,53 +282,63 @@ export default function LandingPage() {
                 <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
                   Why this pairing
                 </p>
-                <p className="mt-3 text-sm text-[var(--md-sys-color-on-surface-variant)]">
-                  Both lines point to the same movement: release urgency and
-                  return to trust. One from literature, one from Scripture.
+                <p className="mt-3 whitespace-pre-line text-sm text-[var(--md-sys-color-on-surface-variant)]">
+                  {samplePairing.rationale}
                 </p>
-                <p className="mt-4 text-sm italic text-[var(--md-sys-color-on-surface)]">
-                  "Just-right-sized reading for a busy day."
+                <p className="mt-4 text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
+                  About the literature
+                </p>
+                <p className="mt-2 whitespace-pre-line text-sm text-[var(--md-sys-color-on-surface-variant)]">
+                  {samplePairing.explanations}
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="trust" className="space-y-6">
+        <section id="emotion-record" className="space-y-6">
           <div className="flex flex-col gap-2">
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
-              Trust
+              Emotion record
             </p>
-            <h2 className="text-2xl font-semibold">Small, steady, and clean.</h2>
+            <h2 className="text-2xl font-semibold">End with one honest check-in.</h2>
             <p className="text-sm text-[var(--md-sys-color-on-surface-variant)] max-w-[38ch]">
-              Daily at 09:00 KST. Unsubscribe anytime. No feed.
+              After the daily pairing, record your emotion in one word and add a short note if needed.
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {[
               {
-                text: "Weekday mornings at 09:00 KST.",
+                title: "Pick one emotion",
+                text: "Choose one word that best matches your current mood.",
                 tone: "bg-[rgba(247,238,224,0.88)]",
               },
               {
-                text: "Unsubscribe in one click, anytime.",
+                title: "Optional memo",
+                text: "Add a short reflection for context (up to 160 characters).",
                 tone: "bg-[rgba(244,224,232,0.86)]",
               },
               {
-                text: "No feed, no ads, no tracking beyond delivery.",
+                title: "Logged for today",
+                text: "Your daily check-in is saved and shown as completed for today.",
                 tone: "bg-[rgba(226,236,247,0.9)]",
               },
             ].map((item) => (
               <div
-                key={item.text}
+                key={item.title}
                 className={`rounded-2xl border border-[color:var(--md-sys-color-outline)] p-5 text-sm text-[var(--md-sys-color-on-surface-variant)] ${item.tone}`}
               >
-                {item.text}
+                <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
+                  {item.title}
+                </p>
+                <p className="mt-2">
+                  {item.text}
+                </p>
               </div>
             ))}
           </div>
           <p className="text-xs text-[var(--md-sys-color-on-surface-variant)]">
-            Need help? Reply to any invite email and we&apos;ll support you.
+            No pressure. You can skip any day and return when you&apos;re ready.
           </p>
         </section>
 
