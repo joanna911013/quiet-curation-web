@@ -32,8 +32,6 @@ type AdminContext =
   | { ok: true; supabase: Awaited<ReturnType<typeof createSupabaseServer>>; userId: string }
   | { ok: false; error: string };
 
-const MAX_EXCERPT_WORDS = 70;
-
 async function requireAdmin(): Promise<AdminContext> {
   const supabase = await createSupabaseServer();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -384,11 +382,6 @@ async function validatePairing(
   const literatureText = pairing.literature_text?.trim() ?? "";
   if (!literatureText) {
     errors.push("Literature excerpt is required.");
-  } else {
-    const wordCount = countWords(literatureText);
-    if (wordCount > MAX_EXCERPT_WORDS) {
-      errors.push(`Literature excerpt exceeds ${MAX_EXCERPT_WORDS} words.`);
-    }
   }
 
   const rationale = pairing.rationale?.trim() ?? "";
@@ -437,14 +430,6 @@ async function findExistingPairing(
   }
 
   return data;
-}
-
-function countWords(value: string) {
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return 0;
-  }
-  return trimmed.split(/\s+/).length;
 }
 
 function formatVerseReference(verse: {
