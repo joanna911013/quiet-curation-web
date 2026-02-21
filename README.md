@@ -36,7 +36,7 @@ Current known limitations:
 This repository contains both user-facing and operator-facing surfaces:
 
 - User-facing app: `/`, `/today`, `/c/[id]`, `/saved`, `/emotion`, `/profile`
-- Marketing: `/landing`, `/subscribe`
+- Marketing: `/landing`, `/subscribe`, `/ko/landing`, `/ko/subscribe`
 - Admin/ops: `/admin`, `/admin/pairings`, `/api/cron/quiet-invite`, plus check/debug routes
 
 ## Stack

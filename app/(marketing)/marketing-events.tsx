@@ -70,3 +70,27 @@ export function MarketingTextLink({
     </Link>
   );
 }
+
+type MarketingCtaButtonProps = {
+  event: MarketingEvent;
+  children: ReactNode;
+  className?: string;
+  type?: "button" | "submit";
+};
+
+export function MarketingCtaButton({
+  event,
+  children,
+  className,
+  type = "button",
+}: MarketingCtaButtonProps) {
+  return (
+    <button
+      type={type}
+      className={className}
+      onClick={() => trackEvent(event)}
+    >
+      {children}
+    </button>
+  );
+}
