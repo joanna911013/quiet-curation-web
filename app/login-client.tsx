@@ -14,7 +14,7 @@ export function LoginClient() {
   const [isSending, setIsSending] = useState(false);
   const [linkSent, setLinkSent] = useState(false);
   const [dismissQueryError, setDismissQueryError] = useState(false);
-  const [isInAppBrowser, setIsInAppBrowser] = useState(false);
+  const [isInAppBrowser] = useState<boolean>(() => detectInAppBrowser());
 
   const queryError =
     searchParams.get("error_description") ||
@@ -46,18 +46,6 @@ export function LoginClient() {
       isActive = false;
     };
   }, [router, safeRedirect]);
-
-  useEffect(() => {
-    if (typeof navigator === "undefined") {
-      return;
-    }
-    const ua = navigator.userAgent || "";
-    const inApp =
-      /KAKAOTALK|KakaoTalk|NAVER|Daum|FBAN|FBAV|Instagram|Line|Twitter|Snapchat/i.test(
-        ua,
-      );
-    setIsInAppBrowser(inApp);
-  }, []);
 
   const handleContinue = async () => {
     if (!email.includes("@")) {
@@ -174,4 +162,15 @@ function formatAuthError(value: string, isInAppBrowser: boolean) {
     return "Sign-in failed in the in-app browser. Open in Safari/Chrome and try again.";
   }
   return value;
+}
+
+function detectInAppBrowser() {
+  if (typeof navigator === "undefined") {
+    return false;
+  }
+
+  const ua = navigator.userAgent || "";
+  return /KAKAOTALK|KakaoTalk|NAVER|Daum|FBAN|FBAV|Instagram|Line|Twitter|Snapchat/i.test(
+    ua,
+  );
 }

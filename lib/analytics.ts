@@ -3,6 +3,8 @@ export type MarketingEvent =
   | "lp_cta_click"
   | "sub_view"
   | "sub_cta_request_click"
+  | "sub_cta_request_sent"
+  | "sub_cta_request_error"
   | "lp_cta_subscribe_click"
   | "lp_cta_secondary_click";
 
