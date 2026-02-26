@@ -36,6 +36,16 @@ const formatVerseReference = (verse: VerseRow | null) => {
   return `${base} (${translation})`;
 };
 
+const buildAttributionParts = (pairing: TodayPairing) => {
+  const author = pairing.literature_author?.trim();
+  const title = pairing.literature_title?.trim();
+  const year = pairing.pub_year ?? null;
+  if (!author && !title) {
+    return null;
+  }
+  return { author: author || null, title: title || null, year };
+};
+
 const formatHeaderDate = (dateValue: string | null | undefined, locale: string) => {
   const date = dateValue ? new Date(dateValue) : new Date();
   const formatter = new Intl.DateTimeFormat(
@@ -57,17 +67,6 @@ const resolveLocale = async () => {
     return "ko";
   }
   return "en";
-};
-
-const collapseText = (value: string | null | undefined) =>
-  (value ?? "").replace(/\s+/g, " ").trim();
-
-const buildPreviewText = (pairing: TodayPairing, verseText: string) => {
-  const literature = collapseText(pairing.literature_text);
-  if (literature) {
-    return literature;
-  }
-  return collapseText(verseText);
 };
 
 export default async function HomePage() {
@@ -126,7 +125,10 @@ export default async function HomePage() {
   const verse = pairing?.verse ?? null;
   const verseReference = pairing ? formatVerseReference(verse) : null;
   const verseText = pairing ? getVerseText(verse) : "";
-  const previewText = pairing ? buildPreviewText(pairing, verseText) : "";
+  const literatureText = pairing?.literature_text?.trim() ?? "";
+  const attribution = pairing ? buildAttributionParts(pairing) : null;
+  const ctaHint =
+    locale === "ko" ? "연결고리 보려면 클릭" : "Click to see explanations";
   const headerDate = formatHeaderDate(null, locale);
 
   if (pairing) {
@@ -176,14 +178,56 @@ export default async function HomePage() {
         </div>
       ) : null}
 
-      {pairing && verseReference && previewText ? (
+      {pairing && verseReference && verseText ? (
         <Link
           href={`/c/${pairing.id}`}
           data-fallback={isFallback ? "true" : "false"}
-          className="todayPreviewCard"
+          className="rounded-2xl border border-neutral-200/80 bg-white p-4 transition hover:border-neutral-300"
         >
-          <div className="todayPreviewRef">{verseReference}</div>
-          <p className="todayPreviewText">{previewText}</p>
+          {literatureText ? (
+            <div className="rounded-2xl border border-neutral-200/70 bg-neutral-50 p-4">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-neutral-400">
+                Literature
+              </div>
+              {attribution ? (
+                <p className="mt-2 text-xs text-neutral-500 truncate">
+                  &mdash;{" "}
+                  {attribution.author ? <span>{attribution.author}</span> : null}
+                  {attribution.author && attribution.title ? ", " : null}
+                  {attribution.title ? (
+                    <em className="italic">{attribution.title}</em>
+                  ) : null}
+                  {attribution.year ? ` (${attribution.year})` : null}
+                </p>
+              ) : null}
+              <p
+                className={`text-[17px] leading-relaxed text-neutral-700 whitespace-pre-line break-words ${
+                  attribution ? "mt-3" : "mt-2"
+                }`}
+              >
+                {literatureText}
+              </p>
+            </div>
+          ) : null}
+          <div className="mt-4 rounded-2xl border border-neutral-200/70 bg-neutral-50 p-4">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-neutral-400">
+              Verse
+            </div>
+            <div className="text-xs font-semibold text-neutral-500 truncate">
+              {verseReference}
+            </div>
+            <p className="mt-2 whitespace-pre-line break-words text-[17px] leading-relaxed text-neutral-900">
+              {verseText}
+            </p>
+          </div>
+          <div className="mt-4">
+            <div className="border-t border-neutral-200/70 pt-3">
+              <div className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-800">
+                <span>{ctaHint}</span>
+                <span aria-hidden="true">›</span>
+              </div>
+            </div>
+          </div>
         </Link>
       ) : null}
 
