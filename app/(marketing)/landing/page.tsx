@@ -30,13 +30,18 @@ const samplePairing = {
 
 export default function LandingPage() {
   return (
-    <main className="relative overflow-hidden">
+    <main className="relative overflow-hidden bg-[linear-gradient(180deg,#fdf9ff_0%,#f7fbff_40%,#fbf8f2_100%)]">
       <MarketingViewEvent event="lp_view" />
-      <div className="pointer-events-none absolute left-[-120px] top-[-80px] h-[360px] w-[360px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(236,194,208,0.55),_rgba(236,194,208,0)_72%)] blur-2xl" />
-      <div className="pointer-events-none absolute right-[-120px] top-[40px] h-[340px] w-[340px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(188,210,228,0.45),_rgba(188,210,228,0)_70%)] blur-2xl" />
-      <div className="pointer-events-none absolute left-1/2 top-[380px] h-[300px] w-[520px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,_rgba(246,227,203,0.55),_rgba(246,227,203,0)_72%)] blur-2xl" />
-      <div className="pointer-events-none absolute right-[6%] top-[520px] h-24 w-24 bg-[radial-gradient(rgba(198,160,102,0.55)_1.2px,transparent_1.2px)] [background-size:10px_10px] opacity-45" />
-      <div className="pointer-events-none absolute left-[10%] top-[760px] h-20 w-20 bg-[radial-gradient(rgba(198,160,102,0.45)_1.2px,transparent_1.2px)] [background-size:10px_10px] opacity-40" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(110%_74%_at_50%_-6%,rgba(245,196,218,0.54),rgba(219,236,252,0.46)_40%,rgba(248,231,198,0.3)_62%,rgba(255,255,255,0)_78%)]" />
+      <div className="pointer-events-none absolute inset-x-[-20%] top-[-220px] h-[620px] bg-[radial-gradient(ellipse_at_center,rgba(247,202,223,0.52),rgba(203,228,252,0.42)_44%,rgba(248,230,193,0.22)_68%,rgba(255,255,255,0)_80%)] blur-3xl" />
+      <div className="pointer-events-none absolute left-[-150px] top-[-90px] h-[430px] w-[430px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(239,178,208,0.7),_rgba(239,178,208,0)_72%)] blur-3xl animate-[float_15s_ease-in-out_infinite]" />
+      <div className="pointer-events-none absolute right-[-130px] top-[20px] h-[380px] w-[380px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(186,214,239,0.66),_rgba(186,214,239,0)_72%)] blur-3xl animate-[float_18s_ease-in-out_infinite]" />
+      <div className="pointer-events-none absolute left-1/2 top-[340px] h-[340px] w-[620px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,_rgba(248,224,188,0.62),_rgba(248,224,188,0)_72%)] blur-3xl animate-[float_20s_ease-in-out_infinite]" />
+      <div className="pointer-events-none absolute left-[8%] top-[780px] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(230,206,244,0.46),_rgba(230,206,244,0)_72%)] blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 opacity-45 [background-image:radial-gradient(rgba(255,255,255,0.92)_0.75px,transparent_0.75px)] [background-size:18px_18px] [mask-image:linear-gradient(to_bottom,rgba(0,0,0,0.58),transparent_85%)]" />
+      <div className="pointer-events-none absolute right-[6%] top-[520px] h-24 w-24 bg-[radial-gradient(rgba(198,160,102,0.58)_1.2px,transparent_1.2px)] [background-size:10px_10px] opacity-55" />
+      <div className="pointer-events-none absolute left-[10%] top-[760px] h-20 w-20 bg-[radial-gradient(rgba(198,160,102,0.5)_1.2px,transparent_1.2px)] [background-size:10px_10px] opacity-45" />
+      <div className="pointer-events-none absolute right-[12%] top-[260px] h-16 w-16 bg-[radial-gradient(rgba(198,160,102,0.44)_1.1px,transparent_1.1px)] [background-size:10px_10px] opacity-40" />
 
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-20 px-6 pb-20 pt-8 sm:pt-12 lg:pt-14">
         <section className="grid gap-8 sm:gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
