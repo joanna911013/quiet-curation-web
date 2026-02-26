@@ -222,7 +222,7 @@ export default async function HomePage() {
           </div>
           <div className="mt-4">
             <div className="border-t border-neutral-200/70 pt-3">
-              <div className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-800">
+              <div className="inline-flex items-center gap-2 rounded-full bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow-sm">
                 <span>{ctaHint}</span>
                 <span aria-hidden="true">›</span>
               </div>
