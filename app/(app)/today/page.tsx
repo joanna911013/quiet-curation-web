@@ -234,7 +234,7 @@ export default async function HomePage() {
       <div className="mt-2 flex flex-col gap-3">
         <Link
           href="/emotion"
-          className="button buttonPrimary inline-flex items-center justify-center"
+          className="button inline-flex items-center justify-center bg-neutral-600 text-white hover:bg-neutral-700"
         >
           Continue
         </Link>
