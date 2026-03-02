@@ -37,6 +37,10 @@ export default async function LocalizedMarketingLayout({
   }
 
   const basePath = locale === "ko" ? "/ko" : "";
+  const navCopy =
+    locale === "ko"
+      ? { landing: "랜딩", subscribe: "구독" }
+      : { landing: "Landing", subscribe: "Subscribe" };
 
   return (
     <div
@@ -56,13 +60,13 @@ export default async function LocalizedMarketingLayout({
               href={`${basePath}/landing`}
               className="hover:text-[var(--md-sys-color-on-surface)]"
             >
-              Landing
+              {navCopy.landing}
             </Link>
             <Link
               href={`${basePath}/subscribe`}
               className="hover:text-[var(--md-sys-color-on-surface)]"
             >
-              Subscribe
+              {navCopy.subscribe}
             </Link>
           </nav>
         </div>

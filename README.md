@@ -1,6 +1,6 @@
 # Quiet Curation Web (MVP)
 
-Last updated: 2026-02-14
+Last updated: 2026-03-02
 
 Quiet Curation Web is the MVP web app for a calm daily ritual:
 
@@ -22,13 +22,12 @@ The following is implemented and in use:
 - Emotion logging (feature-flagged) to `emotion_events` with one entry per user/day.
 - Admin tools for pairings (`/admin`, `/admin/pairings`, edit/new, approve/unapprove, set-as-today).
 - Weekday cron email pipeline at `GET /api/cron/quiet-invite` with retries and provider abstraction.
-- Marketing pages (`/landing`, `/subscribe`) and basic analytics event hooks.
+- Marketing pages (`/landing`, `/subscribe`, `/ko/landing`, `/ko/subscribe`) and basic analytics event hooks.
 - Operational check pages for RLS/search verification (`/whoami`, `/pairings-check`, `/verse-check`, `/search-check`, `/saved-rls-check`).
 
 Current known limitations:
 
-- `/subscribe` form UI is placeholder-only (not wired to real opt-in persistence yet).
-- Internationalization is partially wired (`en`, `ko`) but most app copy is still English.
+- Internationalization is partially wired (`en`, `ko`); marketing routes have localized copy, but much of the signed-in app remains English-first.
 - No automated test suite is included yet (manual route/script checks are used).
 
 ## Product Scope

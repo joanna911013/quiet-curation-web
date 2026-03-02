@@ -18,5 +18,5 @@ export default async function LocalizedSubscribePage({
     notFound();
   }
 
-  return <SubscribePage />;
+  return <SubscribePage locale="ko" />;
 }

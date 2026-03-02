@@ -18,5 +18,5 @@ export default async function LocalizedLandingPage({
     notFound();
   }
 
-  return <LandingPage />;
+  return <LandingPage locale="ko" />;
 }

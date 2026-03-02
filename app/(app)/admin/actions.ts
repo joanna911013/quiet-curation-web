@@ -337,6 +337,8 @@ async function validatePairing(
     errors.push("Locale is required.");
   }
 
+  // Keep this explicit validation for immediate editor feedback.
+  // DB also enforces NOT NULL on pairings.verse_id as a hard safeguard.
   if (!pairing.verse_id) {
     errors.push("Verse is required.");
   }

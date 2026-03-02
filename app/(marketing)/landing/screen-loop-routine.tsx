@@ -22,7 +22,37 @@ const ROUTINE: RoutineItem[] = [
   { label: "Before bed", inches: '6.7"', device: "phone" },
 ];
 
-export function ScreenLoopRoutineSection() {
+type ScreenLoopRoutineSectionProps = {
+  locale?: "en" | "ko";
+};
+
+const routineCopy = {
+  en: {
+    title: "Most people's daily routine",
+    summary:
+      "From the first scroll to the last, this loop can shape the whole day.",
+    question: "How can you get out of this screen loop trap?",
+    screen: "SCREEN",
+    labels: ["Wake up", "At work", "Take a break", "Before bed"],
+  },
+  ko: {
+    title: "대부분의 하루 루틴",
+    summary: "첫 스크롤부터 마지막 스크롤까지, 이 루프가 하루를 좌우할 수 있어요.",
+    question: "이 스크린 루프에서 어떻게 벗어날 수 있을까요?",
+    screen: "스크린",
+    labels: ["기상 직후", "업무 중", "쉬는 시간", "잠들기 전"],
+  },
+} as const;
+
+export function ScreenLoopRoutineSection({
+  locale = "en",
+}: ScreenLoopRoutineSectionProps) {
+  const copy = routineCopy[locale];
+  const routineItems = ROUTINE.map((item, index) => ({
+    ...item,
+    label: copy.labels[index] ?? item.label,
+  }));
+
   useEffect(() => {
     void Promise.all([
       import("@material/web/labs/card/outlined-card.js"),
@@ -39,14 +69,14 @@ export function ScreenLoopRoutineSection() {
             id="screen-routine-title"
             className="text-center text-[clamp(1.9rem,3.2vw,3rem)] font-semibold tracking-[-0.02em] text-[var(--md-sys-color-on-surface)]"
           >
-            Most people&apos;s daily routine
+            {copy.title}
           </h2>
 
           <div className="relative mt-10">
             <div className="pointer-events-none absolute left-[10%] right-[10%] top-[52%] hidden h-[2px] -translate-y-1/2 bg-[color:var(--md-sys-color-outline)] opacity-60 md:block" />
 
             <div className="grid gap-4 md:grid-cols-4">
-              {ROUTINE.map((item) => (
+              {routineItems.map((item) => (
                 <MdFilledCard
                   key={`${item.label}-${item.inches}`}
                   className="block rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-high)] p-4 text-center font-[inherit] shadow-[0_8px_18px_rgba(0,0,0,0.06)]"
@@ -58,7 +88,7 @@ export function ScreenLoopRoutineSection() {
                     <DeviceGlyph type={item.device} />
                   </div>
                   <p className="mt-4 text-base font-semibold tracking-[0.02em] text-[var(--md-sys-color-on-surface)]">
-                    {item.inches} <span className="font-normal opacity-90">SCREEN</span>
+                    {item.inches} <span className="font-normal opacity-90">{copy.screen}</span>
                   </p>
                 </MdFilledCard>
               ))}
@@ -67,7 +97,7 @@ export function ScreenLoopRoutineSection() {
 
           <div className="mt-8 px-4 py-2 text-center">
             <p className="text-xl font-medium text-[var(--md-sys-color-on-surface)]">
-              From the first scroll to the last, this loop can shape the whole day.
+              {copy.summary}
             </p>
           </div>
 
@@ -75,7 +105,7 @@ export function ScreenLoopRoutineSection() {
 
           <div className="mt-6 rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-high)] px-4 py-5 text-center">
             <p className="text-[clamp(1.15rem,2.1vw,1.6rem)] font-semibold text-[var(--md-sys-color-on-surface)]">
-              How can you get out of this screen loop trap?
+              {copy.question}
             </p>
           </div>
         </div>
