@@ -290,16 +290,16 @@ export default function LandingPage() {
               </div>
               <div className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-high)] p-5 shadow-[0_10px_20px_rgba(0,0,0,0.07)]">
                 <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
-                  Why this pairing
-                </p>
-                <p className="mt-3 whitespace-pre-line text-sm text-[var(--md-sys-color-on-surface-variant)]">
-                  {samplePairing.rationale}
-                </p>
-                <p className="mt-4 text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
                   About the literature
                 </p>
-                <p className="mt-2 whitespace-pre-line text-sm text-[var(--md-sys-color-on-surface-variant)]">
+                <p className="mt-3 whitespace-pre-line text-sm text-[var(--md-sys-color-on-surface-variant)]">
                   {samplePairing.explanations}
+                </p>
+                <p className="mt-4 text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
+                  Why this pairing
+                </p>
+                <p className="mt-2 whitespace-pre-line text-sm text-[var(--md-sys-color-on-surface-variant)]">
+                  {samplePairing.rationale}
                 </p>
               </div>
             </div>
