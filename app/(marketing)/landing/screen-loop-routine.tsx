@@ -63,7 +63,7 @@ export function ScreenLoopRoutineSection({
 
   return (
     <section aria-labelledby="screen-routine-title" className="space-y-4">
-      <MdOutlinedCard className="block rounded-[28px] border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface)] p-6 font-[inherit] shadow-[0_14px_36px_rgba(0,0,0,0.08)] sm:p-8">
+      <MdOutlinedCard className="block rounded-[28px] border border-[rgba(158,148,140,0.42)] bg-[linear-gradient(160deg,rgba(250,240,235,0.74),rgba(237,244,250,0.72)_45%,rgba(247,241,231,0.82))] p-6 font-[inherit] shadow-[0_14px_36px_rgba(0,0,0,0.08)] sm:p-8">
         <div className="mx-auto w-full max-w-5xl">
           <h2
             id="screen-routine-title"
@@ -79,7 +79,7 @@ export function ScreenLoopRoutineSection({
               {routineItems.map((item) => (
                 <MdFilledCard
                   key={`${item.label}-${item.inches}`}
-                  className="block rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-high)] p-4 text-center font-[inherit] shadow-[0_8px_18px_rgba(0,0,0,0.06)]"
+                  className="block rounded-3xl border border-[rgba(158,148,140,0.36)] bg-[rgba(255,255,255,0.78)] p-4 text-center font-[inherit] shadow-[0_8px_18px_rgba(0,0,0,0.06)]"
                 >
                   <p className="text-lg font-medium text-[var(--md-sys-color-on-surface)]">
                     {item.label}
@@ -94,16 +94,9 @@ export function ScreenLoopRoutineSection({
               ))}
             </div>
           </div>
+          <MdDivider className="mt-5 block opacity-70" />
 
-          <div className="mt-8 px-4 py-2 text-center">
-            <p className="text-xl font-medium text-[var(--md-sys-color-on-surface)]">
-              {copy.summary}
-            </p>
-          </div>
-
-          <MdDivider className="mt-6 block opacity-75" />
-
-          <div className="mt-6 rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-high)] px-4 py-5 text-center">
+          <div className="mt-5 rounded-2xl border border-[rgba(158,148,140,0.38)] bg-[rgba(250,245,236,0.8)] px-4 py-5 text-center">
             <p className="text-[clamp(1.15rem,2.1vw,1.6rem)] font-semibold text-[var(--md-sys-color-on-surface)]">
               {copy.question}
             </p>
@@ -117,8 +110,8 @@ export function ScreenLoopRoutineSection({
 function DeviceGlyph({ type }: { type: DeviceType }) {
   if (type === "phone") {
     return (
-      <div className="relative h-20 w-12 rounded-[12px] border-[3px] border-[#4a5465] bg-[linear-gradient(145deg,#6ba6f4,#2d6fca)]">
-        <div className="absolute left-1/2 top-1 h-1 w-4 -translate-x-1/2 rounded-full bg-[#4a5465]" />
+      <div className="relative h-20 w-12 rounded-[12px] border-[3px] border-[#6f6871] bg-[linear-gradient(148deg,#d8c4bf,#bcc5cf)]">
+        <div className="absolute left-1/2 top-1 h-1 w-4 -translate-x-1/2 rounded-full bg-[#6f6871]" />
       </div>
     );
   }
@@ -126,16 +119,16 @@ function DeviceGlyph({ type }: { type: DeviceType }) {
   if (type === "laptop") {
     return (
       <div className="relative">
-        <div className="h-12 w-24 rounded-t-md border-[3px] border-[#4a5465] bg-[linear-gradient(145deg,#6ba6f4,#2d6fca)]" />
-        <div className="mx-auto h-2 w-[106px] rounded-b-md bg-[#4a5465]" />
+        <div className="h-12 w-24 rounded-t-md border-[3px] border-[#6f6871] bg-[linear-gradient(148deg,#d8c4bf,#bcc5cf)]" />
+        <div className="mx-auto h-2 w-[106px] rounded-b-md bg-[#6f6871]" />
       </div>
     );
   }
 
   return (
     <div className="relative">
-      <div className="h-14 w-28 rounded-md border-[3px] border-[#4a5465] bg-[linear-gradient(145deg,#6ba6f4,#2d6fca)]" />
-      <div className="mx-auto mt-1 h-2 w-10 rounded-sm bg-[#4a5465]" />
+      <div className="h-14 w-28 rounded-md border-[3px] border-[#6f6871] bg-[linear-gradient(148deg,#d8c4bf,#bcc5cf)]" />
+      <div className="mx-auto mt-1 h-2 w-10 rounded-sm bg-[#6f6871]" />
     </div>
   );
 }
