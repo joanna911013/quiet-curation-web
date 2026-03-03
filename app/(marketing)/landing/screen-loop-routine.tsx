@@ -14,6 +14,11 @@ type RoutineItem = {
 const MdOutlinedCard = "md-outlined-card" as unknown as ElementType;
 const MdFilledCard = "md-filled-card" as unknown as ElementType;
 const MdDivider = "md-divider" as unknown as ElementType;
+const SCREEN_LOOP_TONES = [
+  "rgba(244,224,232,0.86)",
+  "rgba(226,236,247,0.86)",
+  "rgba(218,232,225,0.78)",
+] as const;
 
 const ROUTINE: RoutineItem[] = [
   { label: "Wake up", inches: '6.7"', device: "phone" },
@@ -63,7 +68,7 @@ export function ScreenLoopRoutineSection({
 
   return (
     <section aria-labelledby="screen-routine-title" className="space-y-4">
-      <MdOutlinedCard className="block rounded-[28px] border border-[rgba(158,148,140,0.42)] bg-[linear-gradient(160deg,rgba(250,240,235,0.74),rgba(237,244,250,0.72)_45%,rgba(247,241,231,0.82))] p-6 font-[inherit] shadow-[0_14px_36px_rgba(0,0,0,0.08)] sm:p-8">
+      <MdOutlinedCard className="block rounded-[28px] border border-[color:var(--md-sys-color-outline)] bg-[linear-gradient(160deg,rgba(244,224,232,0.56),rgba(226,236,247,0.54)_45%,rgba(218,232,225,0.5))] p-6 font-[inherit] shadow-[0_14px_36px_rgba(0,0,0,0.08)] sm:p-8">
         <div className="mx-auto w-full max-w-5xl">
           <h2
             id="screen-routine-title"
@@ -76,10 +81,13 @@ export function ScreenLoopRoutineSection({
             <div className="pointer-events-none absolute left-[10%] right-[10%] top-[52%] hidden h-[2px] -translate-y-1/2 bg-[color:var(--md-sys-color-outline)] opacity-60 md:block" />
 
             <div className="grid gap-4 md:grid-cols-4">
-              {routineItems.map((item) => (
+              {routineItems.map((item, index) => (
                 <MdFilledCard
                   key={`${item.label}-${item.inches}`}
-                  className="block rounded-3xl border border-[rgba(158,148,140,0.36)] bg-[rgba(255,255,255,0.78)] p-4 text-center font-[inherit] shadow-[0_8px_18px_rgba(0,0,0,0.06)]"
+                  className="block rounded-3xl border border-[color:var(--md-sys-color-outline)] p-4 text-center font-[inherit] shadow-[0_8px_18px_rgba(0,0,0,0.06)]"
+                  style={{
+                    backgroundColor: SCREEN_LOOP_TONES[index % SCREEN_LOOP_TONES.length],
+                  }}
                 >
                   <p className="text-lg font-medium text-[var(--md-sys-color-on-surface)]">
                     {item.label}
@@ -96,7 +104,7 @@ export function ScreenLoopRoutineSection({
           </div>
           <MdDivider className="mt-5 block opacity-70" />
 
-          <div className="mt-5 rounded-2xl border border-[rgba(158,148,140,0.38)] bg-[rgba(250,245,236,0.8)] px-4 py-5 text-center">
+          <div className="mt-5 rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[rgba(218,232,225,0.72)] px-4 py-5 text-center">
             <p className="text-[clamp(1.15rem,2.1vw,1.6rem)] font-semibold text-[var(--md-sys-color-on-surface)]">
               {copy.question}
             </p>
@@ -110,8 +118,8 @@ export function ScreenLoopRoutineSection({
 function DeviceGlyph({ type }: { type: DeviceType }) {
   if (type === "phone") {
     return (
-      <div className="relative h-20 w-12 rounded-[12px] border-[3px] border-[#6f6871] bg-[linear-gradient(148deg,#d8c4bf,#bcc5cf)]">
-        <div className="absolute left-1/2 top-1 h-1 w-4 -translate-x-1/2 rounded-full bg-[#6f6871]" />
+      <div className="relative h-20 w-12 rounded-[12px] border-[3px] border-[#747081] bg-[linear-gradient(150deg,rgba(226,236,247,0.95),rgba(218,232,225,0.92))]">
+        <div className="absolute left-1/2 top-1 h-1 w-4 -translate-x-1/2 rounded-full bg-[#747081]" />
       </div>
     );
   }
@@ -119,16 +127,16 @@ function DeviceGlyph({ type }: { type: DeviceType }) {
   if (type === "laptop") {
     return (
       <div className="relative">
-        <div className="h-12 w-24 rounded-t-md border-[3px] border-[#6f6871] bg-[linear-gradient(148deg,#d8c4bf,#bcc5cf)]" />
-        <div className="mx-auto h-2 w-[106px] rounded-b-md bg-[#6f6871]" />
+        <div className="h-12 w-24 rounded-t-md border-[3px] border-[#747081] bg-[linear-gradient(150deg,rgba(244,224,232,0.96),rgba(226,236,247,0.92))]" />
+        <div className="mx-auto h-2 w-[106px] rounded-b-md bg-[#747081]" />
       </div>
     );
   }
 
   return (
     <div className="relative">
-      <div className="h-14 w-28 rounded-md border-[3px] border-[#6f6871] bg-[linear-gradient(148deg,#d8c4bf,#bcc5cf)]" />
-      <div className="mx-auto mt-1 h-2 w-10 rounded-sm bg-[#6f6871]" />
+      <div className="h-14 w-28 rounded-md border-[3px] border-[#747081] bg-[linear-gradient(150deg,rgba(226,236,247,0.94),rgba(218,232,225,0.9))]" />
+      <div className="mx-auto mt-1 h-2 w-10 rounded-sm bg-[#747081]" />
     </div>
   );
 }

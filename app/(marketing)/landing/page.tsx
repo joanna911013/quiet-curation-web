@@ -34,6 +34,13 @@ type LandingPageProps = {
   locale?: LandingLocale;
 };
 
+const LANDING_TONES = {
+  rose: "rgba(244,224,232,0.9)",
+  sky: "rgba(226,236,247,0.9)",
+  sage: "rgba(218,232,225,0.78)",
+  corner: "rgba(132,138,150,0.62)",
+} as const;
+
 const landingCopy = {
   en: {
     heroTitle: "Got 3 Minutes?",
@@ -50,8 +57,6 @@ const landingCopy = {
     ],
     primaryCta: "Join the quiet invite",
     secondaryCta: "See a sample pairing",
-    heroMeta: "Weekday mornings | 3 minutes | email only",
-    heroSubMeta: "Daily at 09:00 KST. Unsubscribe anytime.",
     stepByStep: "Step by step",
     stepLines: [
       "Minute 1: Get the invite from your email.",
@@ -67,19 +72,19 @@ const landingCopy = {
           minute: "01",
           title: "Quiet",
           body: "Start your day with a few moments to quiet your spirit.",
-          color: "rgba(244,224,232,0.9)",
+          color: LANDING_TONES.rose,
         },
         {
           minute: "02",
           title: "Read",
           body: "Read one short literature X verse pairing.",
-          color: "rgba(226,236,247,0.9)",
+          color: LANDING_TONES.sky,
         },
         {
           minute: "03",
           title: "Reflection",
           body: "Record your emotion and thoughts.",
-          color: "rgba(218,232,225,0.78)",
+          color: LANDING_TONES.sage,
         },
       ],
     },
@@ -149,8 +154,6 @@ const landingCopy = {
     ],
     primaryCta: "조용한 초대 받기",
     secondaryCta: "샘플 페어링 보기",
-    heroMeta: "평일 아침 | 3분 | 이메일 전송",
-    heroSubMeta: "매일 오전 09:00 KST 발송. 언제든 구독 해지 가능.",
     stepByStep: "Step by step",
     stepLines: [
       "1분: 이메일로 받은 초대를 엽니다.",
@@ -166,19 +169,19 @@ const landingCopy = {
           minute: "01",
           title: "고요",
           body: "하루를 시작하기 전, 마음을 잠깐 고요하게 만듭니다.",
-          color: "rgba(244,224,232,0.9)",
+          color: LANDING_TONES.rose,
         },
         {
           minute: "02",
           title: "읽기",
           body: "문학 X 성경 페어링 한 세트를 읽습니다.",
-          color: "rgba(226,236,247,0.9)",
+          color: LANDING_TONES.sky,
         },
         {
           minute: "03",
           title: "기록",
           body: "오늘의 감정과 생각을 짧게 남깁니다.",
-          color: "rgba(218,232,225,0.78)",
+          color: LANDING_TONES.sage,
         },
       ],
     },
@@ -240,14 +243,14 @@ export default function LandingPage({ locale = "en" }: LandingPageProps) {
   const subscribeHref = locale === "ko" ? "/ko/subscribe" : "/subscribe";
 
   return (
-    <main className="relative isolate overflow-hidden bg-[linear-gradient(180deg,#fdf9ff_0%,#f7fbff_40%,#fbf8f2_100%)]">
+    <main className="relative isolate overflow-hidden bg-[linear-gradient(180deg,rgba(244,224,232,0.48)_0%,rgba(226,236,247,0.44)_46%,rgba(218,232,225,0.36)_100%)]">
       <MarketingViewEvent event="lp_view" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(110%_74%_at_50%_-6%,rgba(245,196,218,0.54),rgba(219,236,252,0.46)_40%,rgba(248,231,198,0.3)_62%,rgba(255,255,255,0)_78%)]" />
-      <div className="pointer-events-none absolute inset-x-[-20%] top-[-220px] h-[620px] bg-[radial-gradient(ellipse_at_center,rgba(247,202,223,0.52),rgba(203,228,252,0.42)_44%,rgba(248,230,193,0.22)_68%,rgba(255,255,255,0)_80%)] blur-3xl" />
-      <div className="pointer-events-none absolute left-[-150px] top-[-90px] h-[430px] w-[430px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(239,178,208,0.7),_rgba(239,178,208,0)_72%)] blur-3xl animate-[float_15s_ease-in-out_infinite]" />
-      <div className="pointer-events-none absolute right-[-130px] top-[20px] h-[380px] w-[380px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(186,214,239,0.66),_rgba(186,214,239,0)_72%)] blur-3xl animate-[float_18s_ease-in-out_infinite]" />
-      <div className="pointer-events-none absolute left-1/2 top-[340px] h-[340px] w-[620px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,_rgba(248,224,188,0.62),_rgba(248,224,188,0)_72%)] blur-3xl animate-[float_20s_ease-in-out_infinite]" />
-      <div className="pointer-events-none absolute left-[8%] top-[780px] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(230,206,244,0.46),_rgba(230,206,244,0)_72%)] blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(110%_74%_at_50%_-6%,rgba(244,224,232,0.56),rgba(226,236,247,0.46)_42%,rgba(218,232,225,0.34)_64%,rgba(255,255,255,0)_80%)]" />
+      <div className="pointer-events-none absolute inset-x-[-20%] top-[-220px] h-[620px] bg-[radial-gradient(ellipse_at_center,rgba(244,224,232,0.48),rgba(226,236,247,0.42)_44%,rgba(218,232,225,0.26)_68%,rgba(255,255,255,0)_82%)] blur-3xl" />
+      <div className="pointer-events-none absolute left-[-150px] top-[-90px] h-[430px] w-[430px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(244,224,232,0.66),_rgba(244,224,232,0)_72%)] blur-3xl animate-[float_15s_ease-in-out_infinite]" />
+      <div className="pointer-events-none absolute right-[-130px] top-[20px] h-[380px] w-[380px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(226,236,247,0.64),_rgba(226,236,247,0)_72%)] blur-3xl animate-[float_18s_ease-in-out_infinite]" />
+      <div className="pointer-events-none absolute left-1/2 top-[340px] h-[340px] w-[620px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,_rgba(218,232,225,0.56),_rgba(218,232,225,0)_72%)] blur-3xl animate-[float_20s_ease-in-out_infinite]" />
+      <div className="pointer-events-none absolute left-[8%] top-[780px] h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(244,224,232,0.42),_rgba(244,224,232,0)_72%)] blur-3xl" />
 
       <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col gap-20 px-6 pb-20 pt-8 sm:pt-12 lg:pt-14">
         <section className="grid gap-8 sm:gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
@@ -295,22 +298,16 @@ export default function LandingPage({ locale = "en" }: LandingPageProps) {
                 {copy.secondaryCta}
               </MarketingTextLink>
             </div>
-            <p className="text-xs uppercase tracking-[0.18em] text-[var(--md-sys-color-on-surface-variant)]">
-              {copy.heroMeta}
-            </p>
-            <p className="text-xs text-[var(--md-sys-color-on-surface-variant)]">
-              {copy.heroSubMeta}
-            </p>
           </div>
           <div className="relative w-full max-w-md justify-self-center lg:justify-self-end">
-            <div className="pointer-events-none absolute -left-5 top-5 h-full w-full rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-low)] shadow-[0_16px_36px_rgba(0,0,0,0.08)]" />
-            <div className="relative overflow-hidden rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[linear-gradient(150deg,rgba(244,224,232,0.72),rgba(226,236,247,0.65)_45%,rgba(247,238,224,0.85))] p-6 shadow-[0_18px_36px_rgba(0,0,0,0.14)] animate-[float_8s_ease-in-out_infinite]">
-              <div className="pointer-events-none absolute left-4 top-4 h-6 w-6 border-l-2 border-t-2 border-[rgba(186,151,95,0.75)]" />
-              <div className="pointer-events-none absolute bottom-4 right-4 h-6 w-6 border-b-2 border-r-2 border-[rgba(186,151,95,0.75)]" />
-              <div className="relative rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container)] p-5">
+            <div className="pointer-events-none absolute -left-5 top-5 h-full w-full rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[rgba(226,236,247,0.52)] shadow-[0_16px_36px_rgba(0,0,0,0.08)]" />
+            <div className="relative overflow-hidden rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[linear-gradient(150deg,rgba(244,224,232,0.72),rgba(226,236,247,0.66)_44%,rgba(218,232,225,0.76)_100%)] p-6 shadow-[0_18px_36px_rgba(0,0,0,0.14)] animate-[float_8s_ease-in-out_infinite]">
+              <div className="pointer-events-none absolute left-4 top-4 h-6 w-6 border-l-2 border-t-2 border-[rgba(132,138,150,0.62)]" />
+              <div className="pointer-events-none absolute bottom-4 right-4 h-6 w-6 border-b-2 border-r-2 border-[rgba(132,138,150,0.62)]" />
+              <div className="relative rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[rgba(255,255,255,0.8)] p-5">
                 <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
                   <span>{copy.stepByStep}</span>
-                  <span className="rounded-full border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-high)] px-2 py-0.5 text-[10px]">
+                  <span className="rounded-full border border-[color:var(--md-sys-color-outline)] bg-[rgba(218,232,225,0.78)] px-2 py-0.5 text-[10px]">
                     ⏰ 3 minutes
                   </span>
                 </div>
@@ -338,7 +335,7 @@ export default function LandingPage({ locale = "en" }: LandingPageProps) {
               {copy.insights.subtitle}
             </p>
           </div>
-          <div className="rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[linear-gradient(160deg,rgba(244,224,232,0.55),rgba(247,238,224,0.65))] p-6 shadow-[0_10px_28px_rgba(0,0,0,0.08)]">
+          <div className="rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[linear-gradient(160deg,rgba(244,224,232,0.56),rgba(226,236,247,0.52),rgba(218,232,225,0.5))] p-6 shadow-[0_10px_28px_rgba(0,0,0,0.08)]">
             <div className="space-y-3">
               {copy.insights.items.map((item) => (
                 <div
@@ -377,13 +374,13 @@ export default function LandingPage({ locale = "en" }: LandingPageProps) {
                 key={item.minute}
                 className={`rounded-2xl border p-5 ${
                   item.tone === "outlined"
-                    ? "border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface)]"
+                    ? "border-[color:var(--md-sys-color-outline)] bg-[rgba(244,224,232,0.58)]"
                     : item.tone === "filled"
-                      ? "border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-high)]"
-                      : "border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container)] shadow-[0_10px_20px_rgba(0,0,0,0.08)]"
+                      ? "border-[color:var(--md-sys-color-outline)] bg-[rgba(226,236,247,0.62)]"
+                      : "border-[color:var(--md-sys-color-outline)] bg-[rgba(218,232,225,0.58)] shadow-[0_10px_20px_rgba(0,0,0,0.08)]"
                 }`}
               >
-                <p className="inline-flex min-h-[28px] items-center rounded-full border border-[color:var(--md-sys-color-outline)] bg-[rgba(246,227,203,0.7)] px-2.5 text-[11px] uppercase tracking-[0.16em] text-[var(--md-sys-color-on-surface-variant)]">
+                <p className="inline-flex min-h-[28px] items-center rounded-full border border-[color:var(--md-sys-color-outline)] bg-[rgba(244,224,232,0.72)] px-2.5 text-[11px] uppercase tracking-[0.16em] text-[var(--md-sys-color-on-surface-variant)]">
                   {item.minute}
                 </p>
                 <p className="mt-3 text-lg text-[var(--md-sys-color-on-surface)]">
@@ -417,14 +414,14 @@ export default function LandingPage({ locale = "en" }: LandingPageProps) {
               {copy.sample.subtitle}
             </p>
           </div>
-          <div className="relative overflow-hidden rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[linear-gradient(160deg,rgba(247,238,224,0.72),rgba(226,236,247,0.6))] p-6">
-            <div className="pointer-events-none absolute left-4 top-4 h-6 w-6 border-l-2 border-t-2 border-[rgba(186,151,95,0.75)]" />
-            <div className="pointer-events-none absolute bottom-4 right-4 h-6 w-6 border-b-2 border-r-2 border-[rgba(186,151,95,0.75)]" />
+          <div className="relative overflow-hidden rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[linear-gradient(160deg,rgba(244,224,232,0.54),rgba(226,236,247,0.58),rgba(218,232,225,0.52))] p-6">
+            <div className="pointer-events-none absolute left-4 top-4 h-6 w-6 border-l-2 border-t-2 border-[rgba(132,138,150,0.62)]" />
+            <div className="pointer-events-none absolute bottom-4 right-4 h-6 w-6 border-b-2 border-r-2 border-[rgba(132,138,150,0.62)]" />
             <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
               <span>{copy.sample.badge}</span>
             </div>
             <div className="mt-4 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-              <div className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface)] p-5">
+              <div className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[rgba(255,255,255,0.84)] p-5">
                 <div className="text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
                   {copy.sample.reading}
                 </div>
@@ -435,7 +432,7 @@ export default function LandingPage({ locale = "en" }: LandingPageProps) {
                 <p className="mt-3 whitespace-pre-line text-base text-[var(--md-sys-color-on-surface)]">
                   {samplePairing.literatureText}
                 </p>
-                <div className="mt-5 rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface)] p-4">
+                <div className="mt-5 rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[rgba(226,236,247,0.66)] p-4">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
                     {copy.sample.verse}
                   </p>
@@ -447,7 +444,7 @@ export default function LandingPage({ locale = "en" }: LandingPageProps) {
                   </p>
                 </div>
               </div>
-              <div className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-high)] p-5 shadow-[0_10px_20px_rgba(0,0,0,0.07)]">
+              <div className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[rgba(244,224,232,0.64)] p-5 shadow-[0_10px_20px_rgba(0,0,0,0.07)]">
                 <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
                   {copy.sample.about}
                 </p>
@@ -475,10 +472,10 @@ export default function LandingPage({ locale = "en" }: LandingPageProps) {
               {copy.emotion.subtitle}
             </p>
           </div>
-          <div className="relative overflow-hidden rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[linear-gradient(160deg,rgba(247,238,224,0.72),rgba(226,236,247,0.6))] p-6">
-            <div className="pointer-events-none absolute left-4 top-4 h-6 w-6 border-l-2 border-t-2 border-[rgba(186,151,95,0.75)]" />
-            <div className="pointer-events-none absolute bottom-4 right-4 h-6 w-6 border-b-2 border-r-2 border-[rgba(186,151,95,0.75)]" />
-            <div className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface)] p-5">
+          <div className="relative overflow-hidden rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[linear-gradient(160deg,rgba(244,224,232,0.52),rgba(226,236,247,0.56),rgba(218,232,225,0.5))] p-6">
+            <div className="pointer-events-none absolute left-4 top-4 h-6 w-6 border-l-2 border-t-2 border-[rgba(132,138,150,0.62)]" />
+            <div className="pointer-events-none absolute bottom-4 right-4 h-6 w-6 border-b-2 border-r-2 border-[rgba(132,138,150,0.62)]" />
+            <div className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[rgba(255,255,255,0.84)] p-5">
               <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
                 {copy.emotion.example}
               </p>
@@ -486,7 +483,7 @@ export default function LandingPage({ locale = "en" }: LandingPageProps) {
                 {copy.emotion.question}
               </p>
               <div className="mt-4 grid gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[rgba(247,238,224,0.72)] p-4">
+                <div className="rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[rgba(226,236,247,0.66)] p-4">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
                     {copy.emotion.selection}
                   </p>
@@ -496,14 +493,14 @@ export default function LandingPage({ locale = "en" }: LandingPageProps) {
                         key={emotion}
                         className={`inline-flex min-h-[30px] items-center rounded-full border px-3 text-xs ${
                           index === 0
-                            ? "border-[color:var(--md-sys-color-primary)] bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)] font-semibold shadow-[0_0_0_2px_rgba(52,99,255,0.22)]"
-                            : "border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface-variant)]"
+                            ? "border-[rgba(162,131,149,0.9)] bg-[rgba(244,224,232,0.96)] text-[rgb(86,66,80)] font-semibold shadow-[0_0_0_2px_rgba(186,151,171,0.22)]"
+                            : "border-[color:var(--md-sys-color-outline)] bg-[rgba(226,236,247,0.78)] text-[var(--md-sys-color-on-surface-variant)]"
                         }`}
                       >
                         {emotion}
                       </span>
                     ))}
-                    <span className="inline-flex min-h-[30px] items-center rounded-full border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container-high)] px-3 text-xs text-[var(--md-sys-color-on-surface-variant)]">
+                    <span className="inline-flex min-h-[30px] items-center rounded-full border border-[color:var(--md-sys-color-outline)] bg-[rgba(226,236,247,0.78)] px-3 text-xs text-[var(--md-sys-color-on-surface-variant)]">
                       ...
                     </span>
                   </div>
@@ -512,7 +509,7 @@ export default function LandingPage({ locale = "en" }: LandingPageProps) {
                   <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
                     {copy.emotion.memo}
                   </p>
-                  <div className="mt-3 rounded-xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface)] px-3 py-2 text-sm text-[var(--md-sys-color-on-surface-variant)]">
+                  <div className="mt-3 rounded-xl border border-[color:var(--md-sys-color-outline)] bg-[rgba(255,255,255,0.88)] px-3 py-2 text-sm text-[var(--md-sys-color-on-surface-variant)]">
                     {copy.emotion.memoExample}
                   </div>
                   <p className="mt-2 text-[11px] text-[var(--md-sys-color-on-surface-variant)]">
@@ -535,7 +532,7 @@ export default function LandingPage({ locale = "en" }: LandingPageProps) {
             {copy.faq.items.map((item) => (
               <details
                 key={item.q}
-                className="group rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[var(--md-sys-color-surface-container)] open:bg-[var(--md-sys-color-surface-container-high)]"
+                className="group rounded-2xl border border-[color:var(--md-sys-color-outline)] bg-[rgba(226,236,247,0.56)] open:bg-[rgba(218,232,225,0.58)]"
               >
                 <summary className="flex cursor-pointer list-none items-start justify-between gap-4 p-5 text-sm font-semibold text-[var(--md-sys-color-on-surface)] [&::-webkit-details-marker]:hidden">
                   <span>{item.q}</span>
@@ -556,9 +553,9 @@ export default function LandingPage({ locale = "en" }: LandingPageProps) {
           </div>
         </section>
 
-        <section className="relative overflow-hidden rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[linear-gradient(155deg,rgba(244,224,232,0.64),rgba(226,236,247,0.58),rgba(247,238,224,0.72))] p-8 text-center">
-          <div className="pointer-events-none absolute left-4 top-4 h-6 w-6 border-l-2 border-t-2 border-[rgba(186,151,95,0.75)]" />
-          <div className="pointer-events-none absolute bottom-4 right-4 h-6 w-6 border-b-2 border-r-2 border-[rgba(186,151,95,0.75)]" />
+        <section className="relative overflow-hidden rounded-3xl border border-[color:var(--md-sys-color-outline)] bg-[linear-gradient(155deg,rgba(244,224,232,0.66),rgba(226,236,247,0.58),rgba(218,232,225,0.58))] p-8 text-center">
+          <div className="pointer-events-none absolute left-4 top-4 h-6 w-6 border-l-2 border-t-2 border-[rgba(132,138,150,0.62)]" />
+          <div className="pointer-events-none absolute bottom-4 right-4 h-6 w-6 border-b-2 border-r-2 border-[rgba(132,138,150,0.62)]" />
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--md-sys-color-on-surface-variant)]">
             {copy.final.label}
           </p>
